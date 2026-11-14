@@ -1,0 +1,1436 @@
+<title>Pivot</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+
+:root {
+  --bg: #F4F5F9;
+  --surface: #FFFFFF;
+  --surface2: #ECEEF5;
+  --ink: #121629;
+  --muted: #5A6077;
+  --line: #DCE0EB;
+  --accent: #4136C8;
+  --accent-ink: #FFFFFF;
+  --accent-soft: #E7E6FB;
+  --ok: #047857;
+  --ok-soft: #DCF2E8;
+  --warn: #A75207;
+  --warn-soft: #FBEEDA;
+  --bad: #B42318;
+  --bad-soft: #FBE4E1;
+  --font-display: "Bricolage Grotesque", "Inter", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0B0F1B; --surface: #121828; --surface2: #1A2138; --ink: #E8EBF5; --muted: #9BA3BE;
+    --line: #283050; --accent: #8F89FF; --accent-ink: #0B0F1B; --accent-soft: #24264A;
+    --ok: #3DD6A0; --ok-soft: #0F2D25; --warn: #F5B947; --warn-soft: #33270F; --bad: #FF8A80; --bad-soft: #3A1818;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0B0F1B; --surface: #121828; --surface2: #1A2138; --ink: #E8EBF5; --muted: #9BA3BE;
+  --line: #283050; --accent: #8F89FF; --accent-ink: #0B0F1B; --accent-soft: #24264A;
+  --ok: #3DD6A0; --ok-soft: #0F2D25; --warn: #F5B947; --warn-soft: #33270F; --bad: #FF8A80; --bad-soft: #3A1818;
+  color-scheme: dark;
+}
+html, body { background: var(--bg); color: var(--ink); }
+body { font-family: var(--font-body); font-size: 15px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+.font-display { font-family: var(--font-display); letter-spacing: -0.02em; }
+.font-mono { font-family: var(--font-mono); }
+h1, h2, h3 { text-wrap: balance; }
+.tnum { font-variant-numeric: tabular-nums; }
+.gutter { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.eyebrow { text-transform: uppercase; letter-spacing: 0.08em; font-size: 11px; font-weight: 600; color: var(--muted); }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; }
+.btn { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; border-radius: 10px; padding: 10px 16px; transition: transform .12s ease, background .15s ease, opacity .15s; }
+.btn:active { transform: translateY(1px); }
+.btn-primary { background: var(--accent); color: var(--accent-ink); }
+.btn-primary:hover { filter: brightness(1.08); }
+.btn-ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+.btn-ghost:hover { background: var(--surface2); }
+.btn[disabled] { opacity: .5; cursor: not-allowed; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+.input { width: 100%; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+.input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.chip { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 4px 10px; font-size: 13px; font-weight: 500; }
+.chip-ok { background: var(--ok-soft); color: var(--ok); }
+.chip-warn { background: var(--warn-soft); color: var(--warn); }
+.chip-bad { background: var(--bad-soft); color: var(--bad); }
+.chip-accent { background: var(--accent-soft); color: var(--accent); }
+.chip-plain { background: var(--surface2); color: var(--muted); }
+.drawer-enter { animation: slideIn .22s ease-out; }
+.fade-in { animation: fadeIn .25s ease-out; }
+@keyframes slideIn { from { transform: translateX(24px); opacity: .4; } to { transform: none; opacity: 1; } }
+@keyframes fadeIn { from { opacity: .3; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+@keyframes blink { 0%, 80%, 100% { opacity: .2; } 40% { opacity: 1; } }
+.dot { width: 6px; height: 6px; border-radius: 99px; background: var(--muted); display: inline-block; animation: blink 1.2s infinite; }
+.dot:nth-child(2) { animation-delay: .2s; } .dot:nth-child(3) { animation-delay: .4s; }
+.spin { animation: spin 1s linear infinite; } @keyframes spin { to { transform: rotate(360deg); } }
+.scroll-x { overflow-x: auto; }
+.prose-tight p + p { margin-top: 8px; }
+.bar-track { background: var(--surface2); border-radius: 99px; overflow: hidden; }
+.bar-fill { background: var(--accent); height: 100%; border-radius: 99px; transition: width .5s ease; }
+.hero-grid { background-image: radial-gradient(var(--line) 1px, transparent 1px); background-size: 22px 22px; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+textarea.input { resize: vertical; min-height: 140px; font-family: var(--font-body); }
+table.data { border-collapse: collapse; font-size: 13px; width: 100%; }
+table.data th, table.data td { padding: 6px 10px; border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap; }
+table.data th { color: var(--muted); font-weight: 600; }
+.mentor-panel { position: fixed; right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(84px + env(safe-area-inset-bottom, 0px)); width: min(380px, calc(100vw - 32px)); max-height: min(560px, calc(100vh - 140px)); z-index: 40; }
+.mentor-fab { position: fixed; right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); z-index: 40; }
+.sticky-head { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 30; background: var(--bg); border-bottom: 1px solid var(--line); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 31; background: var(--bg); }
+</style>
+
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script>
+tailwind.config = {
+  corePlugins: { preflight: true },
+  theme: {
+    extend: {
+      colors: {
+        bg: 'var(--bg)', surface: 'var(--surface)', surface2: 'var(--surface2)', ink: 'var(--ink)', muted: 'var(--muted)',
+        line: 'var(--line)', accent: 'var(--accent)', accentInk: 'var(--accent-ink)', accentSoft: 'var(--accent-soft)',
+        ok: 'var(--ok)', okSoft: 'var(--ok-soft)', warn: 'var(--warn)', warnSoft: 'var(--warn-soft)', bad: 'var(--bad)', badSoft: 'var(--bad-soft)'
+      }
+    }
+  }
+};
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/htm@3.1.1/dist/htm.umd.js"></script>
+
+<div id="root"></div>
+
+<script>
+
+(function () {
+const { useState, useEffect, useRef, useMemo } = React;
+const html = htm.bind(React.createElement);
+
+/* ---------------------------- ICONS (Lucide paths) ---------------------------- */
+const ICONS = {
+  arrowRight: '<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>',
+  arrowLeft: '<path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>',
+  check: '<path d="M20 6 9 17l-5-5"/>',
+  x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+  sparkles: '<path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>',
+  home: '<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
+  briefcase: '<rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>',
+  book: '<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>',
+  message: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+  send: '<path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/>',
+  chart: '<path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/>',
+  target: '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+  flame: '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>',
+  external: '<path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>',
+  search: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+  clock: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+  trophy: '<path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>',
+  copy: '<rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>',
+  info: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
+  dollar: '<line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>',
+  refresh: '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>',
+  folder: '<path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/>',
+  user: '<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+  loader: '<path d="M21 12a9 9 0 1 1-6.219-8.56"/>',
+  compass: '<circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>',
+  shield: '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>',
+  layers: '<path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/>',
+  play: '<polygon points="6 3 20 12 6 21 6 3"/>',
+  wallet: '<path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/>',
+  heart: '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>',
+  wifi: '<path d="M12 20h.01"/><path d="M2 8.82a15 15 0 0 1 20 0"/><path d="M5 12.859a10 10 0 0 1 14 0"/><path d="M8.5 16.429a5 5 0 0 1 7 0"/>',
+  rotate: '<path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/>',
+  lock: '<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+  database: '<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/>'
+};
+function Icon({ name, size = 18, className = '', strokeWidth = 2 }) {
+  return html`<svg xmlns="http://www.w3.org/2000/svg" width=${size} height=${size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+    stroke-width=${strokeWidth} stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" className=${className}
+    dangerouslySetInnerHTML=${{ __html: ICONS[name] || '' }}></svg>`;
+}
+
+/* ------------------------------- DATA: SKILLS ------------------------------- */
+const SKILLS = {
+  communication: 'Clear communication', writing: 'Written communication', listening: 'Active listening',
+  critical: 'Critical thinking', problem: 'Problem solving', timeMgmt: 'Time management', organization: 'Organization & planning',
+  customer: 'Customer empathy & service', numeracy: 'Working with numbers', spreadsheets: 'Spreadsheets (Excel / Sheets)',
+  detail: 'Attention to detail', teaching: 'Teaching & explaining', persuasion: 'Persuasion & negotiation',
+  techFluency: 'Software & tool fluency', visual: 'Visual design sense', coding: 'Coding', research: 'Research & analysis'
+};
+
+/* Current jobs: skill levels 0-5. Modeled on O*NET skill categories (prototype values). */
+const JOBS = {
+  teacher: { label: 'Teacher', aliases: ['teacher', 'educator', 'tutor', 'professor', 'instructor', 'paraprofessional', 'substitute'],
+    s: { communication: 5, writing: 4, listening: 4, critical: 4, problem: 4, timeMgmt: 4, organization: 4, customer: 3, numeracy: 2, spreadsheets: 2, detail: 3, teaching: 5, persuasion: 3, techFluency: 2, visual: 2, research: 3 } },
+  retail_manager: { label: 'Retail Manager', aliases: ['retail manager', 'store manager', 'assistant manager', 'shift manager', 'retail'],
+    s: { communication: 4, writing: 2, listening: 4, critical: 3, problem: 4, timeMgmt: 4, organization: 4, customer: 5, numeracy: 3, spreadsheets: 3, detail: 3, teaching: 3, persuasion: 4, techFluency: 2, visual: 1, research: 1 } },
+  customer_support: { label: 'Customer Support Rep', aliases: ['customer support', 'customer service', 'call center', 'support agent', 'help desk', 'cashier'],
+    s: { communication: 4, writing: 3, listening: 5, critical: 3, problem: 4, timeMgmt: 3, organization: 3, customer: 5, numeracy: 1, spreadsheets: 2, detail: 3, teaching: 2, persuasion: 3, techFluency: 3, research: 2 } },
+  accountant: { label: 'Accountant / Bookkeeper', aliases: ['accountant', 'bookkeeper', 'accounting', 'payroll', 'auditor', 'cpa', 'billing'],
+    s: { communication: 3, writing: 3, listening: 3, critical: 4, problem: 4, timeMgmt: 4, organization: 4, customer: 2, numeracy: 5, spreadsheets: 5, detail: 5, teaching: 1, persuasion: 1, techFluency: 3, visual: 1, coding: 1, research: 3 } },
+  driver: { label: 'Driver (Delivery / Rideshare)', aliases: ['driver', 'delivery', 'uber', 'lyft', 'trucker', 'truck driver', 'courier', 'doordash'],
+    s: { communication: 2, writing: 1, listening: 3, critical: 2, problem: 3, timeMgmt: 4, organization: 3, customer: 3, numeracy: 1, detail: 3, persuasion: 1, techFluency: 2 } },
+  admin: { label: 'Administrative Assistant', aliases: ['administrative', 'admin assistant', 'receptionist', 'office manager', 'secretary', 'office assistant', 'front desk'],
+    s: { communication: 4, writing: 4, listening: 4, critical: 3, problem: 3, timeMgmt: 5, organization: 5, customer: 4, numeracy: 2, spreadsheets: 4, detail: 4, teaching: 1, persuasion: 2, techFluency: 3, visual: 1, research: 2 } },
+  nurse: { label: 'Nurse / Healthcare Worker', aliases: ['nurse', 'rn', 'lpn', 'cna', 'medical assistant', 'healthcare', 'caregiver', 'pharmacy tech'],
+    s: { communication: 5, writing: 3, listening: 5, critical: 5, problem: 5, timeMgmt: 4, organization: 4, customer: 4, numeracy: 3, spreadsheets: 1, detail: 5, teaching: 4, persuasion: 2, techFluency: 3, research: 3 } },
+  sales: { label: 'Sales Associate', aliases: ['sales', 'sales associate', 'account executive', 'sales rep', 'real estate agent', 'insurance agent'],
+    s: { communication: 4, writing: 2, listening: 4, critical: 2, problem: 3, timeMgmt: 3, organization: 2, customer: 5, numeracy: 2, spreadsheets: 1, detail: 2, teaching: 1, persuasion: 5, techFluency: 2, visual: 1, research: 1 } },
+  server: { label: 'Restaurant Server / Hospitality', aliases: ['server', 'waiter', 'waitress', 'bartender', 'barista', 'hospitality', 'hotel', 'host'],
+    s: { communication: 4, writing: 1, listening: 4, critical: 2, problem: 3, timeMgmt: 4, organization: 3, customer: 5, numeracy: 2, detail: 3, teaching: 1, persuasion: 3, techFluency: 1 } },
+  warehouse: { label: 'Warehouse / Logistics Associate', aliases: ['warehouse', 'logistics', 'forklift', 'picker', 'packer', 'stocker', 'fulfillment', 'factory', 'manufacturing'],
+    s: { communication: 2, writing: 1, listening: 3, critical: 2, problem: 3, timeMgmt: 4, organization: 4, customer: 1, numeracy: 2, spreadsheets: 1, detail: 4, teaching: 1, techFluency: 2 } },
+  bank_teller: { label: 'Bank Teller', aliases: ['bank teller', 'teller', 'banker', 'loan officer', 'branch'],
+    s: { communication: 4, writing: 2, listening: 4, critical: 3, problem: 3, timeMgmt: 3, organization: 4, customer: 5, numeracy: 4, spreadsheets: 3, detail: 5, teaching: 1, persuasion: 3, techFluency: 3, research: 1 } }
+};
+
+const INCOMES = [
+  { k: 'u30', label: 'Under $30k', mid: 25000 },
+  { k: '30-50', label: '$30k – $50k', mid: 40000 },
+  { k: '50-75', label: '$50k – $75k', mid: 62500 },
+  { k: '75-100', label: '$75k – $100k', mid: 87500 },
+  { k: '100+', label: '$100k+', mid: 115000 }
+];
+
+const yt = (q) => ({ title: 'Beginner walkthroughs: ' + q, provider: 'YouTube', url: 'https://www.youtube.com/results?search_query=' + encodeURIComponent(q + ' for beginners'), mins: 45 });
+const cs = (q) => ({ title: q + ' (free to audit)', provider: 'Coursera', url: 'https://www.coursera.org/search?query=' + encodeURIComponent(q), mins: 90 });
+const fcc = (q) => ({ title: 'Tutorials: ' + q, provider: 'freeCodeCamp', url: 'https://www.freecodecamp.org/news/search/?query=' + encodeURIComponent(q), mins: 40 });
+
+function T(title, scenario, deliverables, criteria, bullets, minWords = 80, extra = {}) {
+  return Object.assign({ title, scenario, deliverables, criteria, bullets, minWords }, extra);
+}
+
+const CAREERS = {
+  data_analyst: {
+    title: 'Data Analyst', difficulty: 'Moderate', timeToJob: '4–8 months', entry: [55000, 70000], mid: [80000, 100000],
+    demand: 'High', growth: 'Faster than average', tagline: 'Turn messy numbers into decisions.',
+    overview: ['Pull and clean data from spreadsheets and databases', 'Answer business questions with SQL and pivot tables', 'Build dashboards and explain what the numbers mean'],
+    path: ['Junior Data Analyst', 'Data Analyst', 'Senior Analyst / Analytics Manager'],
+    req: { critical: 4, problem: 4, numeracy: 4, spreadsheets: 5, detail: 4, communication: 3, writing: 3, techFluency: 4, coding: 3, research: 3, visual: 2, organization: 2 },
+    modules: [
+      { name: 'Spreadsheets & Data Cleaning', core: ['Formulas: SUMIFS, COUNTIF, XLOOKUP', 'Removing duplicates and fixing formats', 'Handling missing values'],
+        primary: { title: 'Google Data Analytics Certificate', provider: 'Coursera (audit)', url: 'https://www.coursera.org/professional-certificates/google-data-analytics', mins: 240 },
+        task: T('Clean a messy customer list',
+          'A small gym exported its member list. Names are in mixed case, some rows are duplicated, phone numbers use four different formats, and 12% of emails are blank. Explain step by step how you would clean it in Google Sheets or Excel, including the exact formulas you would use.',
+          ['A numbered cleaning plan (5+ steps)', 'At least 3 formulas you would use', 'How you would handle the blank emails'],
+          [['Removes duplicate rows', ['duplicate', 'remove duplicates', 'unique(']], ['Standardizes text and formats', ['trim', 'proper', 'format', 'consistent', 'standardiz']], ['Handles missing values', ['blank', 'missing', 'empty', 'null', 'n/a']], ['Uses real formulas', ['=', 'xlookup', 'vlookup', 'countif', 'iferror', 'substitute']]],
+          ['Cleaned and standardized a 500-row membership dataset in Google Sheets using TRIM, PROPER and de-duplication rules', 'Wrote a repeatable data-cleaning checklist covering duplicates, missing values and inconsistent formats']) },
+      { name: 'Analysis & SQL Basics', core: ['GROUP BY and aggregates', 'Pivot tables', 'Growth and percent change'],
+        primary: { title: 'Intro to SQL: Querying and managing data', provider: 'Khan Academy', url: 'https://www.khanacademy.org/computing/computer-programming/sql', mins: 180 },
+        task: T('Analyze a coffee chain\'s sales year',
+          'You are the new analyst at Bean & Co., a five-store coffee chain. The director wants three answers before Monday. Your dataset below was generated just for you: the numbers are unique to your sprint, so the answers are too.',
+          ['Fastest-growing store, December vs January (%)', 'The month with the lowest network revenue', 'The product that earned the most revenue', 'A 2–3 sentence recommendation'],
+          [['Gives a recommendation', ['recommend', 'should', 'suggest', 'next step', 'invest', 'focus']]],
+          ['Analyzed 12 months of multi-store sales data (180 records) to identify the fastest-growing location and seasonal revenue dips', 'Delivered a data-backed recommendation to leadership on where to focus next quarter\'s investment'], 25, { kind: 'dataset' }) },
+      { name: 'Visualization & Storytelling', core: ['Picking the right chart', 'Dashboards in Looker Studio or Sheets', 'Leading with the insight'],
+        primary: cs('data visualization'),
+        task: T('Build a one-page dashboard for the director',
+          'Using your Bean & Co. data (or any public dataset), build a one-page dashboard in Google Sheets, Looker Studio or Tableau Public. Share the link and write the three insights you would say out loud in a 2-minute meeting.',
+          ['Link to the dashboard', 'At least 2 charts', '3 insights, each with a number'],
+          [['Shares a working link', ['http']], ['Uses suitable chart types', ['bar', 'line', 'chart', 'trend']], ['Insights include numbers', ['%', 'percent', 'increase', 'decrease', 'grew', 'dropped']], ['Ends with an action', ['recommend', 'should', 'next', 'suggest']]],
+          ['Designed an executive dashboard in Looker Studio summarizing revenue trends across five locations', 'Presented three quantified insights that turned raw sales data into a clear next-quarter plan']) },
+      { name: 'Portfolio Case Study', core: ['Problem → data → method → findings', 'Writing for non-technical readers', 'Interview-ready SQL'],
+        primary: { title: 'Relational Database Certification', provider: 'freeCodeCamp', url: 'https://www.freecodecamp.org/learn/relational-database/', mins: 300 },
+        task: T('Write your portfolio case study',
+          'Turn weeks 2 and 3 into a portfolio case study a hiring manager can read in 3 minutes. Use the structure: problem, data, method, findings, recommendation. Paste the text or link to a Google Doc / Notion page.',
+          ['Problem statement', 'Data and method', 'Findings with numbers', 'Recommendation'],
+          [['States the business problem', ['problem', 'goal', 'question']], ['Describes the data', ['data', 'dataset', 'records', 'source']], ['Explains the method', ['sql', 'pivot', 'method', 'approach', 'formula', 'analy']], ['Shares findings', ['found', 'finding', 'result', 'insight', '%']], ['Ends with a recommendation', ['recommend', 'should', 'next']]],
+          ['Published an end-to-end analytics case study covering problem framing, SQL analysis and stakeholder recommendations', 'Translated technical findings into plain-language recommendations for non-technical decision makers'], 150) }
+    ]
+  },
+  instructional_designer: {
+    title: 'Instructional Designer', difficulty: 'Beginner-Friendly', timeToJob: '3–6 months', entry: [55000, 70000], mid: [75000, 95000],
+    demand: 'Steady', growth: 'Average', tagline: 'Design training people actually finish.',
+    overview: ['Turn subject-matter knowledge into online courses', 'Write learning objectives, storyboards and quizzes', 'Build e-learning in tools like Articulate Rise or Canva'],
+    path: ['Instructional Designer', 'Senior ID / Learning Experience Designer', 'Learning & Development Manager'],
+    req: { teaching: 5, writing: 5, communication: 4, organization: 4, visual: 3, techFluency: 3, research: 3, critical: 3, listening: 3, detail: 3, timeMgmt: 3 },
+    modules: [
+      { name: 'Learning Science & ADDIE', core: ['ADDIE model', 'Measurable objectives (Bloom\'s verbs)', 'Adult learning principles'],
+        primary: cs('instructional design'),
+        task: T('Write measurable learning objectives',
+          'A restaurant chain is rolling out a new point-of-sale system. The manager\'s goal is "staff should understand the new POS." Rewrite it as 3 measurable learning objectives and list 3 questions you would ask during the Analysis phase.',
+          ['3 objectives with an action verb, condition and standard', '3 analysis questions'],
+          [['Uses measurable action verbs', ['identify', 'demonstrate', 'process', 'apply', 'calculate', 'complete', 'describe', 'perform']], ['Names the learner', ['learner', 'server', 'staff', 'employee', 'new hire', 'cashier']], ['Sets a standard', ['within', 'without', 'correctly', 'minutes', '%', 'accuracy', 'errors']], ['Includes analysis questions', ['?', 'analysis', 'audience', 'currently']]],
+          ['Rewrote a vague training goal into three measurable learning objectives using Bloom\'s taxonomy', 'Ran a needs analysis to define audience, performance gaps and success criteria before design'], 60) },
+      { name: 'Storyboarding & Course Structure', core: ['Chunking content', 'Scenario-based learning', 'Knowledge checks that match objectives'],
+        primary: yt('instructional design storyboard'),
+        task: T('Storyboard a 10-minute micro-lesson',
+          'Turn a two-page "Lifting Safety" policy for warehouse staff into a 10-minute micro-lesson. Write the storyboard: one objective, 3 content blocks, one realistic scenario and 3 quiz questions.',
+          ['Objective', '3 content blocks (screen by screen)', '1 interactive scenario', '3 knowledge-check questions'],
+          [['States an objective', ['objective', 'by the end', 'learners will']], ['Breaks content into screens or blocks', ['screen', 'slide', 'block', 'scene']], ['Includes a scenario or interaction', ['scenario', 'interaction', 'click', 'choose', 'practice']], ['Adds knowledge checks', ['quiz', 'question', 'check', 'assessment']]],
+          ['Storyboarded a 10-minute scenario-based safety micro-lesson from a two-page policy document', 'Aligned every knowledge check to a measurable objective to improve on-the-job transfer']) },
+      { name: 'Authoring Tools & Accessibility', core: ['Rise / Canva / Google Slides builds', 'Alt text and captions', 'WCAG basics'],
+        primary: { title: 'Introduction to Web Accessibility', provider: 'W3C WAI', url: 'https://www.w3.org/WAI/fundamentals/accessibility-intro/', mins: 30 },
+        task: T('Build the micro-lesson and check accessibility',
+          'Build last week\'s storyboard in a free tool (Google Slides, Canva, Genially or an Articulate Rise trial). Share the link and walk through your accessibility checklist.',
+          ['Link to the lesson', 'Accessibility checklist with what you fixed'],
+          [['Shares a working link', ['http']], ['Adds alt text', ['alt text', 'alt-text', 'alternative text']], ['Covers captions or transcripts', ['caption', 'transcript']], ['Checks readability and contrast', ['contrast', 'font', 'readab', 'size']]],
+          ['Built an accessible e-learning module with alt text, captions and WCAG-aligned color contrast', 'Converted a static policy into an interactive lesson using free authoring tools']) },
+      { name: 'Evaluation & Portfolio', core: ['Kirkpatrick levels', 'Writing a case study', 'Presenting your process'],
+        primary: yt('Kirkpatrick model training evaluation'),
+        task: T('Case study with an evaluation plan',
+          'Write a short portfolio case study for your micro-lesson: the problem, your design choices, and how you would measure success with the Kirkpatrick model.',
+          ['Problem and audience', 'Design decisions', 'Evaluation plan (at least 2 Kirkpatrick levels)'],
+          [['Describes the problem', ['problem', 'challenge', 'goal']], ['Explains design decisions', ['design', 'chose', 'because', 'storyboard']], ['Plans evaluation', ['kirkpatrick', 'level', 'evaluat', 'survey', 'measure']], ['Names a success metric', ['%', 'metric', 'incident', 'completion', 'score']]],
+          ['Wrote a portfolio case study showing analysis, design and a Kirkpatrick-based evaluation plan', 'Defined success metrics linking training completion to fewer workplace incidents'], 150) }
+    ]
+  },
+  customer_success: {
+    title: 'Customer Success Manager', difficulty: 'Beginner-Friendly', timeToJob: '2–5 months', entry: [50000, 65000], mid: [75000, 95000],
+    demand: 'High', growth: 'Faster than average', tagline: 'Keep software customers happy and growing.',
+    overview: ['Onboard new customers to a software product', 'Spot accounts at risk of canceling and save them', 'Run check-ins and quarterly business reviews'],
+    path: ['Customer Success Associate', 'Customer Success Manager', 'Senior CSM / Head of CS'],
+    req: { customer: 5, communication: 5, listening: 5, problem: 4, persuasion: 3, organization: 4, techFluency: 3, writing: 3, timeMgmt: 4, critical: 3, numeracy: 2, spreadsheets: 2 },
+    modules: [
+      { name: 'SaaS & the Customer Lifecycle', core: ['Onboarding → adoption → renewal', 'Churn and retention', 'Key metrics: NPS, health score'],
+        primary: { title: 'Free courses and certifications', provider: 'HubSpot Academy', url: 'https://academy.hubspot.com/courses', mins: 120 },
+        task: T('Map an onboarding journey',
+          'ShiftEasy sells scheduling software to restaurants for $199/month. 30% of new customers cancel in the first 60 days. Map their first 90 days: stages, touchpoints and the metric you would watch at each stage.',
+          ['3–5 stages', 'Touchpoints per stage', 'One metric per stage'],
+          [['Covers onboarding', ['onboard', 'kickoff', 'welcome', 'setup']], ['Covers adoption', ['adoption', 'activation', 'usage', 'log in', 'login']], ['Addresses churn or renewal', ['churn', 'renew', 'retention', 'cancel']], ['Names metrics', ['metric', 'kpi', 'nps', 'health', '%', 'rate']]],
+          ['Designed a 90-day onboarding journey for a SaaS product targeting a 30% early churn rate', 'Defined stage-by-stage success metrics including activation rate and customer health score']) },
+      { name: 'Difficult Conversations', core: ['Acknowledge, own, fix', 'De-escalation language', 'Turning complaints into retention'],
+        primary: yt('customer success de-escalation'),
+        task: T('Reply to a customer threatening to cancel',
+          'Email from Maria, owner of Tacos El Sol: "Your app sent my staff the wrong schedule twice this week. Two people didn\'t show up and I lost a Saturday. I want a refund and I\'m canceling." Write your reply.',
+          ['A complete email reply', 'A concrete fix and timeline', 'An offer to keep the account'],
+          [['Acknowledges the impact', ['sorry', 'apolog', 'understand', 'frustrat', 'saturday']], ['Offers a concrete fix', ['fix', 'resolved', 'workaround', 'root cause', 'step']], ['Commits to a timeline', ['today', 'tomorrow', 'within', 'by ', 'hours']], ['Makes a retention offer', ['credit', 'refund', 'free', 'call', 'offer']]],
+          ['De-escalated a churn-risk account by owning the issue, proposing a fix and offering a service credit', 'Wrote retention emails that balance empathy, accountability and clear next steps'], 90) },
+      { name: 'Health Scores & Churn Signals', core: ['Leading vs lagging indicators', 'Prioritizing a book of accounts', 'Save plays'],
+        primary: cs('customer success management'),
+        task: T('Rank five accounts by churn risk',
+          'Your accounts this week: Brightline Dental (logins down 60%, 4 open tickets, NPS 3). Northwind Bakery (logins steady, NPS 9). Copper Pot Grill (champion just quit, renewal in 30 days). Lumen Yoga (usage up 25%, asked about the Pro plan). Harbor Fitness (no logins in 21 days). Rank them by risk and write your action for the top 3.',
+          ['Ranked list with reasons', 'Action plan for the top 3'],
+          [['Identifies the highest-risk accounts', ['harbor', 'brightline', 'copper']], ['Explains the risk signals', ['login', 'ticket', 'nps', 'champion', 'renewal', 'usage']], ['Plans specific actions', ['call', 'meeting', 'outreach', 'training', 'qbr', 'email']], ['Spots the expansion opportunity', ['lumen', 'upsell', 'expansion', 'pro plan', 'upgrade']]],
+          ['Prioritized a five-account portfolio by churn risk using usage, NPS and stakeholder-change signals', 'Built save plans for at-risk accounts and flagged an expansion opportunity for the sales team']) },
+      { name: 'QBRs & Portfolio', core: ['Quarterly business reviews', 'Showing ROI', 'Your CS portfolio'],
+        primary: yt('quarterly business review customer success'),
+        task: T('Draft a quarterly business review',
+          'Draft a QBR outline for Lumen Yoga: last quarter\'s results, the value they got, and the plan for next quarter (including the Pro plan conversation).',
+          ['Goals recap', 'Usage and value with numbers', 'Next-quarter plan'],
+          [['Recaps goals', ['goal', 'objective']], ['Shows usage data', ['usage', 'login', 'data', '%', 'metric']], ['Quantifies value', ['saved', 'hours', 'roi', 'value', '$']], ['Plans next quarter', ['next quarter', 'plan', 'roadmap', 'upgrade', 'pro']]],
+          ['Prepared a QBR presenting usage trends, ROI and a next-quarter success plan', 'Positioned a plan upgrade as a customer outcome rather than a sales pitch'], 120) }
+    ]
+  },
+  ux_designer: {
+    title: 'UX/UI Designer', difficulty: 'Moderate', timeToJob: '6–10 months', entry: [60000, 80000], mid: [90000, 115000],
+    demand: 'Competitive', growth: 'Average', tagline: 'Make apps easy and pleasant to use.',
+    overview: ['Interview users and map their problems', 'Sketch flows, wireframes and high-fidelity screens in Figma', 'Test prototypes and hand designs to developers'],
+    path: ['Junior Product Designer', 'Product Designer', 'Senior / Lead Designer'],
+    req: { visual: 5, research: 4, critical: 4, problem: 4, communication: 3, listening: 4, techFluency: 4, detail: 4, writing: 2, coding: 1, organization: 2 },
+    modules: [
+      { name: 'Design Fundamentals & User Psychology', core: ['Hierarchy, contrast, spacing', 'Nielsen\'s heuristics', 'Laws of UX'],
+        primary: { title: 'Laws of UX', provider: 'lawsofux.com', url: 'https://lawsofux.com/', mins: 40 },
+        task: T('Critique two app screens', 'Pick any two screens from an app you use daily. Critique them with at least 3 usability heuristics and suggest one improvement per issue.', ['3+ issues tied to heuristics', 'An improvement for each'],
+          [['Uses visual design vocabulary', ['hierarchy', 'contrast', 'alignment', 'spacing', 'typography']], ['References heuristics', ['heuristic', 'nielsen', 'consistency', 'feedback', 'affordance', 'error']], ['Suggests improvements', ['improve', 'suggest', 'instead', 'could', 'should']], ['Thinks about the user', ['user', 'people', 'task']]],
+          ['Ran heuristic evaluations of production mobile apps and proposed prioritized usability fixes', 'Applied Nielsen\'s heuristics and visual hierarchy principles to critique real interfaces']) },
+      { name: 'Figma & Prototyping', core: ['Frames and auto layout', 'Components and variants', 'Clickable prototypes'],
+        primary: { title: 'Figma Learn', provider: 'Figma', url: 'https://help.figma.com/hc/en-us', mins: 120 },
+        task: T('Design a sign-in screen and prototype', 'Design a sign-in screen with error and loading states in Figma, connect it into a clickable prototype and share the link.', ['Figma link', 'Default, error and loading states', 'Clickable flow'],
+          [['Shares a Figma link', ['figma.com', 'http']], ['Uses components or auto layout', ['component', 'auto layout', 'variant', 'frame']], ['Builds a prototype', ['prototype', 'flow', 'interaction', 'click']], ['Covers states', ['error', 'loading', 'empty', 'state']]],
+          ['Built a component-based sign-in flow in Figma with error, loading and success states', 'Created a clickable prototype to validate the flow before development']) },
+      { name: 'Wireframes & User Flows', core: ['Task flows', 'Low-fidelity wireframes', 'Edge cases'],
+        primary: yt('user flow wireframe'),
+        task: T('Flow and wireframes for a booking feature', 'A pet-sitting app wants owners to book a sitter in under a minute. Map the user flow and describe or link low-fi wireframes, including what happens when no sitter is available.', ['User flow', '3+ wireframes', 'At least one edge case'],
+          [['Maps the flow step by step', ['flow', 'step', 'then', '→', '->']], ['Includes wireframes', ['wireframe', 'low-fi', 'sketch', 'screen']], ['Handles edge cases', ['edge', 'error', 'no sitter', 'unavailable', 'cancel']], ['Ties to the user goal', ['goal', 'user', 'owner', 'minute']]],
+          ['Mapped an end-to-end booking flow and low-fidelity wireframes targeting a sub-60-second task', 'Designed edge-case states for unavailable providers and cancellations']) },
+      { name: 'Portfolio & Handoff', core: ['Case-study storytelling', 'Design specs', 'Working with engineers'],
+        primary: yt('ux portfolio case study'),
+        task: T('Write a UX case study', 'Write a case study for your booking feature: problem, research, iterations, final design and what you learned.', ['Problem', 'Research or user input', 'Iterations', 'Outcome and lessons'],
+          [['States the problem', ['problem', 'challenge']], ['Shows research', ['research', 'interview', 'survey', 'user']], ['Shows iteration', ['iterat', 'version', 'test', 'feedback', 'changed']], ['Reflects on outcome', ['result', 'outcome', 'learned', 'next']]],
+          ['Published a UX case study documenting research, iteration and design rationale', 'Communicated design decisions with annotated specs ready for developer handoff'], 150) }
+    ]
+  },
+  digital_marketer: {
+    title: 'Digital Marketer', difficulty: 'Beginner-Friendly', timeToJob: '3–6 months', entry: [45000, 60000], mid: [65000, 85000],
+    demand: 'High', growth: 'Faster than average', tagline: 'Bring the right people to a business online.',
+    overview: ['Plan campaigns across email, social and search', 'Write copy that gets clicks', 'Track results and shift budget to what works'],
+    path: ['Marketing Coordinator', 'Digital Marketing Specialist', 'Marketing Manager'],
+    req: { writing: 4, persuasion: 4, communication: 3, numeracy: 3, spreadsheets: 3, visual: 3, research: 3, techFluency: 4, critical: 3, customer: 2, timeMgmt: 3 },
+    modules: [
+      { name: 'Funnels & Fundamentals', core: ['Awareness → conversion', 'Personas', 'Channel basics'],
+        primary: { title: 'Digital Marketing & E-commerce Certificate', provider: 'Grow with Google', url: 'https://grow.google/certificates/digital-marketing-ecommerce/', mins: 240 },
+        task: T('Build a funnel for a yoga studio', 'A local yoga studio is launching $15 online classes. Design the funnel from first touch to first booking.', ['Funnel stages', 'Channel per stage', 'Metric per stage'],
+          [['Covers awareness', ['awareness', 'reach', 'top of funnel', 'social', 'instagram']], ['Captures leads', ['lead', 'email', 'sign up', 'free class']], ['Drives conversion', ['convert', 'book', 'purchase', 'checkout']], ['Measures it', ['ctr', 'conversion rate', 'cpa', 'metric', '%']]],
+          ['Designed a full-funnel acquisition plan for a local studio\'s online class launch', 'Defined stage-level KPIs from click-through rate to cost per booking']) },
+      { name: 'Copywriting & Email', core: ['Benefit-led copy', 'Subject lines', 'Welcome sequences'],
+        primary: { title: 'Free courses and certifications', provider: 'HubSpot Academy', url: 'https://academy.hubspot.com/courses', mins: 120 },
+        task: T('Write a 3-email welcome sequence', 'Write the 3 emails a new subscriber gets from the yoga studio over 7 days.', ['3 emails with subject lines', 'A call to action in each'],
+          [['Writes subject lines', ['subject']], ['Includes calls to action', ['book', 'click', 'join', 'reserve', 'cta', 'call to action']], ['Focuses on benefits', ['you', 'your', 'feel', 'benefit']], ['Sequences the emails', ['email 1', 'email 2', 'email 3', 'day 1', 'day 3', 'day 7']]],
+          ['Wrote a three-part welcome email sequence designed to convert subscribers into first-time customers', 'Applied benefit-led copywriting and clear calls to action across the lifecycle'], 150) },
+      { name: 'Paid Social & Analytics', core: ['Audiences and targeting', 'A/B tests', 'Reading results'],
+        primary: { title: 'Google Skillshop', provider: 'Google', url: 'https://skillshop.withgoogle.com/', mins: 120 },
+        task: T('Plan a $500 ad test', 'Plan how you would spend $500 over two weeks to test ads for the online classes.', ['Budget split', 'Audiences', 'A/B variants', 'Success metrics'],
+          [['Splits the budget', ['$', 'budget']], ['Defines audiences', ['audience', 'target', 'interest', 'lookalike']], ['Designs a test', ['a/b', 'variant', 'test', 'version']], ['Picks KPIs', ['ctr', 'cpc', 'cpa', 'roas', 'conversion']]],
+          ['Planned a $500 paid social A/B test with defined audiences, variants and cost-per-acquisition targets', 'Set up measurement to reallocate budget toward the best-performing creative']) },
+      { name: 'Campaign Report & Portfolio', core: ['Reporting results', 'Insights and next steps', 'Portfolio pieces'],
+        primary: yt('marketing campaign report'),
+        task: T('Write a campaign results report', 'Write a one-page report for the studio owner on the campaign (use realistic sample numbers and label them as sample).', ['Goal', 'Results by channel', 'Learnings and next steps'],
+          [['States the goal', ['goal', 'objective']], ['Breaks down channels', ['email', 'social', 'search', 'channel', 'instagram']], ['Reports numbers', ['%', 'clicks', 'bookings', 'cost']], ['Recommends next steps', ['next', 'recommend', 'learn']]],
+          ['Reported multi-channel campaign results with clear learnings and next-month recommendations', 'Turned campaign metrics into a plain-language summary for a small-business owner'], 120) }
+    ]
+  },
+  frontend_dev: {
+    title: 'Frontend Web Developer', difficulty: 'Steep', timeToJob: '8–14 months', entry: [65000, 85000], mid: [95000, 125000],
+    demand: 'Competitive', growth: 'Faster than average', tagline: 'Build the websites people click on.',
+    overview: ['Build pages with HTML, CSS and JavaScript', 'Turn designs into responsive components', 'Fix bugs and ship features with a team'],
+    path: ['Junior Frontend Developer', 'Frontend Developer', 'Senior / Lead Engineer'],
+    req: { coding: 5, techFluency: 5, problem: 5, critical: 4, detail: 4, visual: 3, research: 3, writing: 2, communication: 3, timeMgmt: 3 },
+    modules: [
+      { name: 'HTML & CSS Fundamentals', core: ['Semantic HTML', 'Flexbox and grid', 'Responsive design'],
+        primary: { title: 'Responsive Web Design Certification', provider: 'freeCodeCamp', url: 'https://www.freecodecamp.org/learn/2022/responsive-web-design/', mins: 300 },
+        task: T('Build a responsive landing section', 'Build a responsive hero + features section for a local bakery. Share a CodePen or GitHub link and explain your layout choices.', ['Live link', 'Works on phone and desktop', 'Short explanation'],
+          [['Shares a link', ['http', 'github', 'codepen']], ['Uses modern layout', ['flex', 'grid', 'media query', 'responsive']], ['Uses semantic HTML', ['semantic', 'header', 'section', 'nav', 'main']], ['Considers accessibility', ['alt', 'aria', 'contrast', 'accessib']]],
+          ['Built a responsive landing page with semantic HTML, Flexbox and CSS Grid', 'Applied accessibility basics including alt text and color contrast']) },
+      { name: 'JavaScript Essentials', core: ['DOM and events', 'Functions and arrays', 'Input validation'],
+        primary: { title: 'The Modern JavaScript Tutorial', provider: 'javascript.info', url: 'https://javascript.info/', mins: 300 },
+        task: T('Build a tip calculator', 'Build a tip calculator that splits a bill between people and handles bad input. Share the link and describe how you handled edge cases.', ['Live link', 'Input validation', 'Edge cases you tested'],
+          [['Shares a link', ['http']], ['Uses events and functions', ['function', 'event', 'addeventlistener', 'onclick', '=>']], ['Validates input', ['validat', 'nan', 'empty', 'negative', 'error']], ['Tests edge cases', ['edge', 'test', 'zero', '0 people']]],
+          ['Built an interactive bill-splitting calculator in vanilla JavaScript with input validation', 'Tested edge cases such as empty, negative and zero inputs']) },
+      { name: 'React & Components', core: ['Components and props', 'State', 'Lists and keys'],
+        primary: { title: 'Learn React', provider: 'react.dev', url: 'https://react.dev/learn', mins: 240 },
+        task: T('Build a job-application tracker', 'Build a small React app to track job applications (add, update status, filter). Share the repo link.', ['Repo link', 'Add + status update + filter', 'README'],
+          [['Shares a repo link', ['github', 'http']], ['Uses components and state', ['component', 'usestate', 'props', 'state']], ['Renders lists correctly', ['map', 'key', 'list', 'filter']], ['Includes a README', ['readme']]],
+          ['Developed a React application with stateful components to track job applications', 'Documented setup and features in a clear README for reviewers']) },
+      { name: 'Git, Deploy & Portfolio', core: ['Git workflow', 'Deploying to Vercel or Netlify', 'Portfolio site'],
+        primary: fcc('git and github for beginners'),
+        task: T('Deploy your portfolio', 'Deploy a portfolio site linking your three projects. Share the live URL and repo.', ['Live URL', 'Repo with commits', 'Project descriptions'],
+          [['Shares the repo', ['github']], ['Deploys it', ['vercel', 'netlify', 'pages', 'deploy']], ['Writes a README', ['readme']], ['Commits regularly', ['commit', 'branch']]],
+          ['Deployed a personal portfolio to Vercel with continuous deployment from GitHub', 'Maintained clean commit history and documentation across three projects']) }
+    ]
+  },
+  technical_writer: {
+    title: 'Technical Writer', difficulty: 'Moderate', timeToJob: '4–8 months', entry: [55000, 70000], mid: [80000, 100000],
+    demand: 'Steady', growth: 'Average', tagline: 'Explain complicated things simply.',
+    overview: ['Write help articles, guides and API docs', 'Interview engineers and test features yourself', 'Keep documentation accurate as products change'],
+    path: ['Junior Technical Writer', 'Technical Writer', 'Senior Writer / Docs Lead'],
+    req: { writing: 5, research: 4, detail: 5, techFluency: 4, communication: 4, critical: 3, organization: 4, listening: 3, teaching: 3 },
+    modules: [
+      { name: 'Technical Writing Fundamentals', core: ['Active voice', 'Short sentences', 'Audience first'],
+        primary: { title: 'Technical Writing Courses', provider: 'Google for Developers', url: 'https://developers.google.com/tech-writing', mins: 180 },
+        task: T('Rewrite a confusing paragraph', 'Rewrite this as clear steps: "In order to make changes to the notification settings it is necessary that the preferences area be accessed by the user, after which the toggles may be adjusted and saved, though saving may not work if the session has expired."', ['Numbered steps', 'Prerequisite or note', 'Expected result'],
+          [['Uses numbered steps', ['1.', 'step 1', '2.']], ['Writes in active voice', ['select', 'click', 'open', 'tap', 'you']], ['Adds a prerequisite or note', ['before', 'note', 'prerequisite', 'signed in', 'session']], ['States the result', ['result', 'you will see', 'saved', 'confirmation']]],
+          ['Rewrote dense product copy into scannable, task-based instructions in active voice', 'Applied Google\'s technical writing principles to cut reading time']) },
+      { name: 'How-To Guides', core: ['Task-based docs', 'Warnings and notes', 'Troubleshooting'],
+        primary: yt('how to write documentation'),
+        task: T('Write a two-factor authentication guide', 'Write a how-to for turning on two-factor authentication in a fictional banking app, including what to do if the code never arrives.', ['Prerequisites', 'Steps', 'Troubleshooting'],
+          [['Lists prerequisites', ['before you begin', 'prerequisite', 'you need']], ['Gives steps', ['1.', 'step']], ['Adds troubleshooting', ['troubleshoot', 'if the code', 'didn\'t', 'doesn\'t']], ['Uses notes or warnings', ['note', 'warning', 'important']]],
+          ['Authored an end-user guide for two-factor authentication with troubleshooting steps', 'Structured content with prerequisites, procedures and warnings for non-technical readers'], 120) },
+      { name: 'API Docs & Markdown', core: ['Endpoints and parameters', 'Request and response examples', 'Error codes'],
+        primary: { title: 'Markdown Guide', provider: 'markdownguide.org', url: 'https://www.markdownguide.org/', mins: 30 },
+        task: T('Document an API endpoint', 'Document GET /v1/orders, which returns a customer\'s orders. It takes status (open, shipped, canceled) and limit (default 20). It returns 200 with a list, or 401 if the API key is missing.', ['Description', 'Parameters table', 'Example response', 'Errors'],
+          [['Describes the endpoint', ['get', '/v1/orders', 'endpoint', 'returns']], ['Documents parameters', ['status', 'limit', 'parameter', 'query']], ['Shows a response', ['200', '{', 'json', 'response']], ['Covers errors', ['401', 'error', 'unauthorized']]],
+          ['Wrote reference documentation for a REST endpoint including parameters, example responses and error codes', 'Formatted developer docs in Markdown following industry API documentation conventions']) },
+      { name: 'Style Guides & Portfolio', core: ['Microsoft and Google style guides', 'Before/after samples', 'Docs portfolio'],
+        primary: yt('technical writing portfolio'),
+        task: T('Assemble your writing portfolio', 'Combine your three samples into a portfolio page (Google Doc, Notion or GitHub). Add a short intro and a before/after example.', ['Link', 'Intro for hiring managers', 'Before/after sample'],
+          [['Shares a link', ['http']], ['Names the audience', ['audience', 'reader', 'user', 'developer']], ['Mentions a style guide', ['style guide', 'microsoft', 'google']], ['Shows a revision', ['before', 'after', 'revis']]],
+          ['Published a technical writing portfolio with how-to guides, API docs and before/after revisions', 'Followed the Google developer documentation style guide across samples']) }
+    ]
+  },
+  virtual_assistant: {
+    title: 'Virtual Executive Assistant', difficulty: 'Beginner-Friendly', timeToJob: '1–3 months', entry: [35000, 50000], mid: [50000, 70000],
+    demand: 'High', growth: 'Average', tagline: 'Run a busy person\'s week from your laptop.',
+    overview: ['Manage calendars, inboxes and travel', 'Prepare documents and reports', 'Keep projects and follow-ups on track'],
+    path: ['Virtual Assistant', 'Executive Assistant', 'Chief of Staff / Operations Manager'],
+    req: { organization: 5, timeMgmt: 5, communication: 4, writing: 4, detail: 4, techFluency: 3, customer: 3, listening: 3, spreadsheets: 3, problem: 3 },
+    modules: [
+      { name: 'Calendar & Inbox Management', core: ['Inbox triage', 'Scheduling across time zones', 'Saying no politely'],
+        primary: { title: 'Google Calendar Help Center', provider: 'Google', url: 'https://support.google.com/calendar', mins: 30 },
+        task: T('Triage an executive\'s inbox', 'Your executive has 8 unread emails: a board meeting reschedule, a vendor invoice, a podcast invite, a client complaint, a newsletter, a travel confirmation, a hiring candidate\'s follow-up, and a request from her daughter\'s school. Sort them and say what you would do with each.', ['Priority for each email', 'Your action for each'],
+          [['Sets priorities', ['urgent', 'priority', 'high', 'low']], ['Delegates or forwards', ['delegate', 'forward', 'finance', 'loop in']], ['Uses the calendar', ['calendar', 'schedule', 'reschedul', 'meeting']], ['Defers or archives', ['archive', 'later', 'defer', 'unsubscribe']]],
+          ['Triaged a high-volume executive inbox using priority rules, delegation and calendar management', 'Protected executive focus time by routing low-priority requests and batching responses']) },
+      { name: 'Travel & Event Coordination', core: ['Itineraries', 'Budgets', 'Contingency plans'],
+        primary: yt('executive assistant travel planning'),
+        task: T('Plan a two-day business trip', 'Plan a two-day trip from Chicago to Austin for a client meeting with a $1,200 budget. Include flights, hotel, ground transport and a backup plan.', ['Itinerary with times', 'Budget breakdown', 'Backup plan'],
+          [['Covers flights', ['flight', 'airline']], ['Books lodging', ['hotel', 'lodging']], ['Stays on budget', ['$', 'budget', 'total']], ['Plans for problems', ['backup', 'if', 'delay', 'contingency']]],
+          ['Planned an on-budget two-day business itinerary including flights, lodging and contingency options', 'Managed a $1,200 travel budget with a line-item cost breakdown']) },
+      { name: 'Tools & Automation', core: ['Asana / Notion / Sheets', 'Templates and SOPs', 'Simple automations'],
+        primary: { title: 'Zapier Learn', provider: 'Zapier', url: 'https://zapier.com/learn', mins: 60 },
+        task: T('Write an SOP for a weekly report', 'Write a standard operating procedure for compiling the executive\'s Friday sales summary from a shared spreadsheet.', ['Steps', 'Tools', 'Deadline and checklist'],
+          [['Lists steps', ['1.', 'step']], ['Names tools', ['sheet', 'excel', 'notion', 'asana', 'zapier', 'slack']], ['Sets timing', ['friday', 'weekly', 'every', 'deadline']], ['Adds a checklist or template', ['checklist', 'template']]],
+          ['Wrote a standard operating procedure that made a weekly sales report repeatable in under 30 minutes', 'Documented tools, deadlines and quality checks so any team member can run it']) },
+      { name: 'Client Communication & Portfolio', core: ['Service packages', 'Rates', 'Onboarding clients'],
+        primary: yt('virtual assistant services packages'),
+        task: T('Create your services one-pager', 'Create a one-page services menu you could send a first client: what you do, packages, rates and availability.', ['Services', 'Packages and rates', 'Availability'],
+          [['Lists services', ['service', 'inbox', 'calendar', 'travel']], ['Sets rates or packages', ['$', 'rate', 'package', 'hour']], ['States availability', ['hours', 'available', 'time zone', 'est', 'pst', 'cst']], ['Has a call to action', ['book', 'contact', 'email', 'call']]],
+          ['Created a services offering with tiered packages and transparent rates', 'Prepared client-ready materials for launching a freelance virtual assistant practice']) }
+    ]
+  },
+  automation_specialist: {
+    title: 'No-Code / Automation Specialist', difficulty: 'Moderate', timeToJob: '3–6 months', entry: [50000, 70000], mid: [80000, 110000],
+    demand: 'High', growth: 'Faster than average', tagline: 'Connect apps so work does itself.',
+    overview: ['Find repetitive manual work in a business', 'Build automations in Zapier, Make or Airtable', 'Measure hours saved and maintain workflows'],
+    path: ['Automation Specialist', 'Operations / RevOps Specialist', 'Automation Lead / Solutions Architect'],
+    req: { techFluency: 5, problem: 5, critical: 4, detail: 4, organization: 3, spreadsheets: 4, coding: 2, communication: 3, research: 3 },
+    modules: [
+      { name: 'Process Mapping', core: ['Triggers and steps', 'Finding time sinks', 'Estimating hours saved'],
+        primary: yt('business process mapping'),
+        task: T('Map a manual process', 'Pick a manual process you know from work (scheduling, inventory, invoicing). Map each step and identify what could be automated and how much time it would save each week.', ['Current steps', 'Automation opportunities', 'Hours saved estimate'],
+          [['Names a trigger', ['trigger', 'when', 'every time']], ['Maps steps', ['step', '1.', 'then']], ['Estimates time saved', ['hour', 'minute', 'saved', 'per week']], ['Names tools', ['zapier', 'make', 'airtable', 'sheet', 'form']]],
+          ['Mapped a manual operations process and identified automation opportunities saving several hours per week', 'Quantified time savings to prioritize automation work']) },
+      { name: 'Zapier / Make Basics', core: ['Triggers and actions', 'Filters and paths', 'Testing'],
+        primary: { title: 'Zapier Learn', provider: 'Zapier', url: 'https://zapier.com/learn', mins: 60 },
+        task: T('Build a form-to-sheet-to-email automation', 'Build an automation: when someone fills a form, add a row to a spreadsheet and send them a personalized email. Describe it and share a screenshot link.', ['Trigger and actions', 'One filter or condition', 'How you tested it'],
+          [['Defines the trigger', ['trigger', 'form', 'submission']], ['Defines actions', ['action', 'row', 'email', 'sheet']], ['Adds logic', ['filter', 'condition', 'path', 'if']], ['Tests it', ['test', 'sample', 'worked']]],
+          ['Built a no-code workflow connecting a web form, spreadsheet and email with conditional logic', 'Tested automations end to end with sample data before going live']) },
+      { name: 'Airtable & Databases', core: ['Tables and fields', 'Linked records', 'Views and filters'],
+        primary: yt('airtable tutorial'),
+        task: T('Design a base for a small agency', 'Design an Airtable base for a 5-person marketing agency tracking clients, projects and invoices.', ['Tables and fields', 'Relationships', 'Two useful views'],
+          [['Defines tables', ['table']], ['Defines fields', ['field', 'column']], ['Links records', ['link', 'linked', 'relationship']], ['Creates views', ['view', 'filter', 'kanban', 'grid']]],
+          ['Designed a relational Airtable base linking clients, projects and invoices', 'Built filtered views so team members see only the work that needs attention']) },
+      { name: 'ROI & Portfolio', core: ['Before/after metrics', 'Documentation', 'Pricing projects'],
+        primary: yt('automation consultant portfolio'),
+        task: T('Write an automation case study', 'Write a before/after case study of one automation: the manual process, the build, and the time or money saved.', ['Before', 'After', 'Savings', 'Link or screenshot'],
+          [['Describes before', ['before', 'manual']], ['Describes after', ['after', 'automat']], ['Quantifies savings', ['hour', 'saved', '$', '%']], ['Links proof', ['http']]],
+          ['Documented an automation that eliminated manual data entry and saved hours each week', 'Presented ROI with before/after process maps']) }
+    ]
+  },
+  qa_tester: {
+    title: 'QA Software Tester', difficulty: 'Beginner-Friendly', timeToJob: '3–6 months', entry: [50000, 65000], mid: [75000, 95000],
+    demand: 'Steady', growth: 'Average', tagline: 'Find the bugs before customers do.',
+    overview: ['Write and run test cases for new features', 'Report bugs developers can reproduce', 'Learn to automate repeated checks'],
+    path: ['QA Tester', 'QA Analyst / Engineer', 'SDET / QA Lead'],
+    req: { detail: 5, critical: 4, problem: 4, techFluency: 4, writing: 3, communication: 3, organization: 3, coding: 2, research: 2, timeMgmt: 3 },
+    modules: [
+      { name: 'Testing Fundamentals', core: ['Test cases', 'Positive and negative tests', 'Boundary values'],
+        primary: { title: 'Ministry of Testing', provider: 'Ministry of Testing', url: 'https://www.ministryoftesting.com/', mins: 60 },
+        task: T('Write test cases for a sign-up form', 'Write 6 test cases for a sign-up form with email, password (8+ characters) and birth date (must be 18+).', ['6 test cases', 'Expected result for each', 'At least 2 boundary tests'],
+          [['Writes test cases', ['test case', 'tc', 'case 1']], ['Defines expected results', ['expected']], ['Includes negative tests', ['invalid', 'negative', 'wrong', 'error']], ['Tests boundaries', ['boundary', '7 characters', '8 characters', '17', '18', 'edge', 'empty']]],
+          ['Designed positive, negative and boundary test cases for a user registration flow', 'Documented expected results to make test runs repeatable']) },
+      { name: 'Bug Reporting', core: ['Steps to reproduce', 'Severity vs priority', 'Evidence'],
+        primary: yt('how to write a bug report'),
+        task: T('Write a bug report', 'On a shopping site, adding 11 items to the cart shows a total of $0.00 in Safari on iPhone. Write the bug report.', ['Title', 'Steps to reproduce', 'Expected vs actual', 'Severity and environment'],
+          [['Gives steps to reproduce', ['steps to reproduce', 'step', '1.']], ['States expected result', ['expected']], ['States actual result', ['actual']], ['Sets severity', ['severity', 'priority', 'critical', 'high']], ['Names the environment', ['safari', 'iphone', 'ios', 'environment', 'browser']]],
+          ['Wrote reproducible bug reports with environment details, severity and expected vs actual results', 'Isolated a device-specific checkout defect affecting cart totals']) },
+      { name: 'Exploratory & Regression Testing', core: ['Test charters', 'Time-boxed sessions', 'Regression suites'],
+        primary: yt('exploratory testing charter'),
+        task: T('Run an exploratory session', 'Pick any public website. Write a test charter, run a 30-minute session, and report what you found.', ['Charter', 'Session notes', 'Findings'],
+          [['Writes a charter', ['charter', 'mission', 'explore']], ['Considers risk', ['risk']], ['Time-boxes it', ['30', 'minute', 'session']], ['Reports findings', ['found', 'finding', 'bug', 'issue']]],
+          ['Ran time-boxed exploratory testing sessions guided by risk-based charters', 'Reported usability and functional issues on a live public website']) },
+      { name: 'Automation Basics & Portfolio', core: ['Playwright basics', 'Assertions', 'Portfolio repo'],
+        primary: { title: 'Playwright: Getting started', provider: 'Playwright', url: 'https://playwright.dev/docs/intro', mins: 90 },
+        task: T('Automate one test', 'Automate one sign-up test with Playwright or Cypress and share the repo.', ['Repo link', 'One passing test', 'README'],
+          [['Shares a repo', ['github', 'http']], ['Uses an automation tool', ['playwright', 'cypress', 'selenium']], ['Uses assertions', ['expect', 'assert']], ['Writes a README', ['readme']]],
+          ['Automated an end-to-end sign-up test with Playwright, including assertions', 'Published a QA portfolio repository with test cases, bug reports and automation']) }
+    ]
+  },
+  seo_specialist: {
+    title: 'SEO Specialist', difficulty: 'Beginner-Friendly', timeToJob: '3–6 months', entry: [45000, 60000], mid: [65000, 85000],
+    demand: 'Steady', growth: 'Average', tagline: 'Help businesses get found on Google.',
+    overview: ['Research what customers search for', 'Optimize pages and content', 'Report rankings and traffic'],
+    path: ['SEO Coordinator', 'SEO Specialist', 'SEO Manager / Head of Growth'],
+    req: { research: 4, writing: 4, numeracy: 3, spreadsheets: 3, techFluency: 4, critical: 4, detail: 3, persuasion: 2, communication: 3 },
+    modules: [
+      { name: 'How Search Works', core: ['Crawling and indexing', 'Title tags and meta descriptions', 'Mobile and speed'],
+        primary: { title: 'SEO Starter Guide', provider: 'Google Search Central', url: 'https://developers.google.com/search/docs/fundamentals/seo-starter-guide', mins: 60 },
+        task: T('Audit a local business homepage', 'Pick a real local business website. Audit its homepage and list the top 5 fixes.', ['5 issues', 'Fix for each', 'Priority order'],
+          [['Checks the title tag', ['title tag', 'title']], ['Checks meta description', ['meta description', 'meta']], ['Checks headings', ['h1', 'heading']], ['Checks mobile and speed', ['mobile', 'speed', 'core web vitals', 'load']]],
+          ['Audited a local business website and prioritized on-page SEO fixes', 'Identified title, meta and mobile performance issues affecting search visibility']) },
+      { name: 'Keyword Research', core: ['Search intent', 'Long-tail keywords', 'Local SEO'],
+        primary: yt('keyword research'),
+        task: T('Build a keyword list for a dog groomer', 'Build a 10-keyword list for a mobile dog-grooming business in Phoenix, grouped by intent.', ['10 keywords', 'Intent for each', 'Your top 3 picks and why'],
+          [['Lists keywords', ['keyword', 'dog groom']], ['Labels intent', ['intent', 'informational', 'transactional', 'commercial']], ['Considers difficulty or volume', ['volume', 'difficulty', 'long-tail', 'long tail']], ['Targets local search', ['phoenix', 'near me', 'local']]],
+          ['Built an intent-grouped keyword strategy for a local service business', 'Prioritized long-tail local keywords with realistic ranking potential']) },
+      { name: 'On-Page & Content', core: ['Content briefs', 'Internal linking', 'Optimizing headings'],
+        primary: cs('search engine optimization'),
+        task: T('Write an SEO content brief', 'Write a content brief for a blog post targeting "how often should you groom a dog".', ['Target keyword and intent', 'H1/H2 outline', 'Internal links', 'Meta description'],
+          [['Outlines headings', ['h1', 'h2', 'heading']], ['Uses the keyword', ['keyword', 'how often']], ['Plans internal links', ['internal link', 'link to']], ['Writes a meta description', ['meta']]],
+          ['Wrote SEO content briefs with keyword targeting, heading structure and internal linking plans', 'Aligned content with search intent to improve organic click-through']) },
+      { name: 'Reporting & Portfolio', core: ['Search Console basics', 'Tracking rankings', 'Monthly reports'],
+        primary: { title: 'Google Skillshop', provider: 'Google', url: 'https://skillshop.withgoogle.com/', mins: 90 },
+        task: T('Write a monthly SEO report', 'Write a one-page monthly SEO report for the groomer (label sample numbers as sample).', ['Traffic and clicks', 'Rankings', 'Next month\'s plan'],
+          [['Reports traffic', ['traffic', 'clicks', 'impressions']], ['Reports rankings', ['ranking', 'position']], ['Uses a real tool', ['search console', 'analytics']], ['Recommends next steps', ['next', 'recommend', 'plan']]],
+          ['Produced monthly SEO reports translating Search Console data into next steps', 'Tracked keyword rankings and organic traffic for a local business']) }
+    ]
+  }
+};
+const CAREER_ORDER = ['data_analyst', 'instructional_designer', 'customer_success', 'ux_designer', 'digital_marketer', 'frontend_dev', 'technical_writer', 'virtual_assistant', 'automation_specialist', 'qa_tester', 'seo_specialist'];
+
+/* ------------------------------- ENGINE ------------------------------- */
+const fmt$ = (n) => '$' + Math.round(n).toLocaleString('en-US');
+const fmtK = (n) => '$' + Math.round(n / 1000) + 'k';
+const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
+const todayStr = () => new Date().toISOString().slice(0, 10);
+
+function matchJob(text) {
+  const t = (text || '').toLowerCase().trim();
+  if (!t) return null;
+  for (const [k, j] of Object.entries(JOBS)) if (j.label.toLowerCase() === t) return k;
+  let best = null, bestLen = 0;
+  for (const [k, j] of Object.entries(JOBS)) for (const a of j.aliases) if (t.includes(a) && a.length > bestLen) { best = k; bestLen = a.length; }
+  return best;
+}
+
+/* For job titles we don't know: a neutral profile adjusted by keywords in the title. */
+function inferSkills(text) {
+  const t = (text || '').toLowerCase();
+  const s = { communication: 3, writing: 2, listening: 3, critical: 3, problem: 3, timeMgmt: 3, organization: 3, customer: 2, numeracy: 2, spreadsheets: 2, detail: 3, teaching: 1, persuasion: 2, techFluency: 2, visual: 1, coding: 0, research: 2 };
+  const bump = (keys, kw, lvl) => { if (kw.some(w => t.includes(w))) keys.forEach(k => s[k] = Math.max(s[k], lvl)); };
+  bump(['spreadsheets', 'numeracy', 'detail'], ['analyst', 'finance', 'excel', 'data', 'clerk'], 4);
+  bump(['writing', 'research'], ['writer', 'editor', 'journalist', 'content', 'paralegal'], 4);
+  bump(['customer', 'listening'], ['service', 'client', 'support', 'patient'], 4);
+  bump(['organization', 'timeMgmt'], ['coordinator', 'manager', 'scheduler', 'dispatcher', 'planner'], 4);
+  bump(['visual'], ['design', 'artist', 'photograph'], 4);
+  bump(['coding', 'techFluency'], ['developer', 'it ', 'technician', 'engineer'], 3);
+  bump(['teaching'], ['coach', 'trainer', 'counselor'], 4);
+  return s;
+}
+
+function profileSkills(profile) {
+  if (profile.jobKey && JOBS[profile.jobKey]) return JOBS[profile.jobKey].s;
+  return profile.inferred || inferSkills(profile.jobLabel);
+}
+
+/* Transferable-skill match: weighted share of the target role's required skill levels you already cover.
+   Weight = required level, x1.8 for hard (tool/technical) skills so soft skills alone cannot inflate the score. */
+const HARD = new Set(['coding', 'spreadsheets', 'visual', 'techFluency', 'numeracy']);
+function computeMatch(cur, req) {
+  let have = 0, need = 0;
+  const transferable = [], gaps = [], polish = [];
+  for (const [k, r] of Object.entries(req)) {
+    const c = cur[k] || 0;
+    const wt = r * (HARD.has(k) ? 1.8 : 1); have += Math.min(c, r) * wt; need += r * wt;
+    if (c >= 3 && r >= 2) transferable.push({ k, c, r });
+    if (r - c >= 2) gaps.push({ k, c, r, gap: r - c });
+    else if (r - c === 1) polish.push({ k, c, r });
+  }
+  transferable.sort((a, b) => Math.min(b.c, b.r) - Math.min(a.c, a.r) || b.r - a.r);
+  gaps.sort((a, b) => b.gap - a.gap || b.r - a.r);
+  return { score: Math.round((have / need) * 100), transferable, gaps, polish };
+}
+
+/* Seeded dataset for the Data Analyst week-2 task: answers are computed from the data, not stored. */
+function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+function makeCoffeeData(seed) {
+  const rnd = mulberry32(seed);
+  const names = ['Downtown', 'Airport', 'Campus', 'Riverside', 'Harbor'];
+  const order = names.map(n => [n, rnd()]).sort((a, b) => a[1] - b[1]).map(x => x[0]);
+  const growths = [0.30 + rnd() * 0.12, 0.04 + rnd() * 0.05, 0.12 + rnd() * 0.06, -0.06 + rnd() * 0.04, 0.16 + rnd() * 0.06];
+  const stores = order.map((n, i) => ({ n, base: 15000 + Math.round(rnd() * 12000), g: growths[i] }));
+  const dipMonth = 1 + Math.floor(rnd() * 3); // Feb, Mar or Apr
+  const season = MONTHS.map((_, m) => (m === dipMonth ? 0.74 : 1 + (m === 11 ? 0.1 : 0) + (rnd() - 0.5) * 0.04));
+  const prodNames = [['Latte', 'Cold Brew', 'Pastries'], ['Cold Brew', 'Latte', 'Pastries'], ['Pastries', 'Latte', 'Cold Brew']][Math.floor(rnd() * 3)];
+  const shares = [0.45, 0.31, 0.24];
+  const rows = [];
+  for (let m = 0; m < 12; m++) for (const s of stores) {
+    const storeTotal = s.base * (1 + s.g * m / 11) * season[m];
+    prodNames.forEach((p, i) => rows.push({ month: MONTHS[m], store: s.n, product: p, revenue: Math.round(storeTotal * shares[i] * (0.97 + rnd() * 0.06)) }));
+  }
+  const byStoreMonth = {}; const byMonth = Array(12).fill(0); const byProd = {};
+  rows.forEach(r => { const mi = MONTHS.indexOf(r.month); byStoreMonth[r.store] = byStoreMonth[r.store] || Array(12).fill(0); byStoreMonth[r.store][mi] += r.revenue; byMonth[mi] += r.revenue; byProd[r.product] = (byProd[r.product] || 0) + r.revenue; });
+  let topStore = null, topPct = -Infinity;
+  for (const [s, arr] of Object.entries(byStoreMonth)) { const pct = (arr[11] - arr[0]) / arr[0] * 100; if (pct > topPct) { topPct = pct; topStore = s; } }
+  const lowMonth = MONTHS[byMonth.indexOf(Math.min(...byMonth))];
+  const topProduct = Object.entries(byProd).sort((a, b) => b[1] - a[1])[0][0];
+  const csv = ['month,store,product,revenue', ...rows.map(r => `${r.month},${r.store},${r.product},${r.revenue}`)].join('\n');
+  return { rows, csv, answers: { topStore, topPct: Math.round(topPct * 10) / 10, lowMonth, topProduct } };
+}
+function gradeDataset(data, a) {
+  const norm = (x) => (x || '').toString().trim().toLowerCase();
+  const pct = parseFloat(String(a.q1Pct || '').replace(/[^0-9.\-]/g, ''));
+  const monthOk = (() => { const v = norm(a.q2Month); if (!v) return false; const target = data.answers.lowMonth.toLowerCase(); const idx = MONTHS.findIndex(m => m.toLowerCase() === target) + 1; return v === target || v === target.slice(0, 3) || v === String(idx); })();
+  return [
+    { label: 'Fastest-growing store', met: norm(a.q1Store) === data.answers.topStore.toLowerCase(), note: 'Compares December with January for each store.', auto: true },
+    { label: 'Growth percentage (±3 points)', met: !isNaN(pct) && Math.abs(pct - data.answers.topPct) <= 3, note: '(December − January) ÷ January × 100.', auto: true },
+    { label: 'Lowest revenue month', met: monthOk, note: 'Sum all stores and products per month.', auto: true },
+    { label: 'Top product by revenue', met: norm(a.q3Product) === data.answers.topProduct.toLowerCase(), note: 'Sum revenue per product across the year.', auto: true }
+  ];
+}
+
+/* Rubric checks that run in the browser on every submission (transparent, repeatable). */
+function rubricCheck(task, text, link) {
+  const body = ((text || '') + ' ' + (link || '')).toLowerCase();
+  const words = (text || '').trim().split(/\s+/).filter(Boolean).length;
+  const results = task.criteria.map(([label, kws]) => ({ label, met: kws.some(k => body.includes(k.toLowerCase())), auto: true }));
+  results.push({ label: `Enough detail (${task.minWords}+ words)`, met: words >= task.minWords, note: `${words} words`, auto: true });
+  return results;
+}
+const scoreOf = (checks) => Math.round(checks.filter(c => c.met).length / Math.max(1, checks.length) * 100);
+const PASS = 70;
+
+/* Readiness verdict across four pillars: skills, money, work fit, remote fit. */
+function readiness(state) {
+  const p = state.profile; if (!p) return null;
+  const career = CAREERS[p.careerKey];
+  const m = computeMatch(profileSkills(p), career.req);
+  const passed = [1, 2, 3, 4].filter(w => state.submissions[w]?.passed).length;
+  const skills = clamp(m.score + passed * 6, 0, 100);
+  const income = INCOMES.find(i => i.k === p.income)?.mid || 40000;
+  const ratio = career.entry[0] / income;
+  const money = ratio >= 0.95 ? 90 : ratio >= 0.8 ? 65 : 40;
+  const cis = Object.values(state.checkins || {});
+  const avg = (key) => cis.length ? cis.reduce((s, c) => s + c[key], 0) / cis.length : null;
+  const energy = avg('energy'), remote = avg('remote');
+  const pillars = [
+    { key: 'skills', label: 'Skills', icon: 'target', value: skills, note: `${m.score}% starting match + ${passed} portfolio task${passed === 1 ? '' : 's'} passed` },
+    { key: 'money', label: 'Money', icon: 'wallet', value: money, note: ratio >= 0.95 ? 'Entry pay roughly matches or beats your current income' : ratio >= 0.8 ? 'Expect a modest dip at entry level; plan a cushion' : 'Entry pay is well below your current income; transition gradually' },
+    { key: 'fit', label: 'Work fit', icon: 'heart', value: energy == null ? null : Math.round(energy / 5 * 100), note: energy == null ? 'Rate your energy after each task' : `Average energy after tasks: ${energy.toFixed(1)} / 5` },
+    { key: 'remote', label: 'Remote fit', icon: 'wifi', value: remote == null ? null : Math.round(remote / 5 * 100), note: remote == null ? 'Rate how working solo felt after each task' : `Comfort working solo: ${remote.toFixed(1)} / 5` }
+  ];
+  const known = pillars.filter(x => x.value != null);
+  let verdict = null;
+  if (passed >= 2 && known.length === 4) {
+    const min = Math.min(...known.map(x => x.value)); const avgV = known.reduce((s, x) => s + x.value, 0) / 4;
+    verdict = min >= 60 && avgV >= 70 ? 'ready' : min >= 45 ? 'close' : 'not_yet';
+  }
+  return { pillars, verdict, passed };
+}
+
+/* ------------------------------- AI ADAPTER ------------------------------- */
+const AI_ENDPOINT = '/api/ai';
+let providerPromise = null; let aiDisabled = false; const aiListeners = new Set();
+function getProvider() {
+  if (providerPromise) return providerPromise;
+  providerPromise = (async () => {
+    try {
+      if (location.protocol.startsWith('http')) {
+        const r = await fetch(AI_ENDPOINT, { method: 'GET' });
+        if (r.ok) { const j = await r.json(); if (j.ok) return { kind: 'gemini', label: 'Gemini' }; }
+      }
+    } catch (e) { }
+    try {
+      if (window.claude && window.claude.use) { const s = await window.claude.use('sample'); if (s) return { kind: 'claude', label: 'Claude', sample: s }; }
+    } catch (e) { }
+    return null;
+  })();
+  return providerPromise;
+}
+function disableAI() { aiDisabled = true; aiListeners.forEach(f => f({ kind: 'offline' })); }
+const PERMANENT = ['not_granted', 'sampling_disabled', 'not_declared', 'capability_disabled', 'capability_removed'];
+
+async function callServer(body, signal) {
+  const r = await fetch(AI_ENDPOINT, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body), signal });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok || !j.text) throw new Error(j.error || ('AI request failed: ' + r.status));
+  return j.text;
+}
+function parseJSONLoose(text) {
+  try { return JSON.parse(text); } catch (e) { }
+  const fence = text.match(/```(?:json)?\s*([\s\S]*?)```/); if (fence) { try { return JSON.parse(fence[1]); } catch (e) { } }
+  const i = text.indexOf('{'), j = text.lastIndexOf('}'); if (i >= 0 && j > i) { try { return JSON.parse(text.slice(i, j + 1)); } catch (e) { } }
+  return null;
+}
+const memo = new Map();
+async function aiJSON(prompt, opts = {}) {
+  if (aiDisabled) return null; const p = await getProvider(); if (!p) return null;
+  try {
+    if (p.kind === 'gemini') return parseJSONLoose(await callServer({ prompt, json: true }, opts.signal));
+    return await p.sample.json(prompt, { signal: opts.signal });
+  } catch (e) { if (PERMANENT.includes(e?.code)) disableAI(); return null; }
+}
+async function aiText(input, opts = {}) {
+  if (aiDisabled) return null; const p = await getProvider(); if (!p) return null;
+  const key = opts.cache && opts.cache !== false ? JSON.stringify(input) : null;
+  if (key && memo.has(key)) return memo.get(key);
+  try {
+    let text;
+    if (p.kind === 'gemini') {
+      const body = typeof input === 'string' ? { prompt: input } : { messages: input };
+      text = await callServer(body, opts.signal);
+      opts.onText && opts.onText({ text, delta: text });
+    } else {
+      const { cache, ...rest } = opts;
+      text = (await p.sample(input, Object.assign({}, rest, typeof input === 'string' ? {} : { cache: false }))).text;
+    }
+    if (key) memo.set(key, text);
+    return text;
+  } catch (e) {
+    if (PERMANENT.includes(e?.code)) disableAI();
+    if (e?.name === 'AbortError' || e?.code === 'cancelled') return e.text || '';
+    return null;
+  }
+}
+const wait = (ms) => new Promise(r => setTimeout(r, ms));
+function useAIStatus() {
+  const [st, setSt] = useState({ kind: 'checking' });
+  useEffect(() => { let alive = true; getProvider().then(p => { if (alive) setSt(p && !aiDisabled ? p : { kind: 'offline' }); }); const f = (v) => setSt(v); aiListeners.add(f); return () => { alive = false; aiListeners.delete(f); }; }, []);
+  return st;
+}
+
+/* ------------------------------- STATE ------------------------------- */
+const KEY = 'pivot.v1';
+const EMPTY = { view: 'landing', profile: null, submissions: {}, checkins: {}, activeDays: [], activeWeek: 1, tab: 'plan', chat: [], startedAt: null };
+function loadState() { try { const s = localStorage.getItem(KEY); return s ? Object.assign({}, EMPTY, JSON.parse(s)) : EMPTY; } catch (e) { return EMPTY; } }
+function saveState(s) { try { localStorage.setItem(KEY, JSON.stringify(s)); } catch (e) { } }
+function streakOf(days) {
+  const set = new Set(days); let n = 0; const d = new Date();
+  for (;;) { const k = d.toISOString().slice(0, 10); if (set.has(k)) { n++; d.setDate(d.getDate() - 1); } else break; }
+  return n;
+}
+
+/* Sample profile: Jessica, 34, elementary teacher -> instructional designer, week 1 done. */
+function demoState() {
+  const d0 = new Date(); const days = [0, 1, 2].map(i => { const d = new Date(d0); d.setDate(d.getDate() - i); return d.toISOString().slice(0, 10); });
+  const task = CAREERS.instructional_designer.modules[0].task;
+  const text = 'Objective 1: By the end of training, servers will process a split check on the new POS in under 2 minutes without manager help.\nObjective 2: New hires will correctly apply a discount code with 100% accuracy on 3 practice orders.\nObjective 3: Staff will identify the 4 steps to void an item and complete a void without errors.\n\nAnalysis questions:\n1. Who is the audience and how comfortable are they with touchscreens today?\n2. What mistakes happen most often with the current system?\n3. How much time can staff spend on training during a shift?';
+  const checks = rubricCheck(task, text, '');
+  return Object.assign({}, EMPTY, {
+    view: 'workspace', startedAt: Date.now() - 3 * 86400000, activeWeek: 2, tab: 'plan', activeDays: days,
+    profile: { name: 'Jessica', jobKey: 'teacher', jobLabel: 'Elementary School Teacher', income: '50-75', careerKey: 'instructional_designer', seed: 4242, demo: true },
+    submissions: { 1: { text, link: '', checks, score: scoreOf(checks), passed: true, at: Date.now() - 86400000, ai: null, bullets: task.bullets } },
+    checkins: { 1: { energy: 5, remote: 4 } }
+  });
+}
+
+/* ================================ UI ================================ */
+function AIBadge() {
+  const st = useAIStatus();
+  if (st.kind === 'checking') return html`<span className="chip chip-plain"><${Icon} name="loader" size=${13} className="spin" /> Connecting AI</span>`;
+  return st.kind !== 'offline'
+    ? html`<span className="chip chip-ok" title=${'Reviews and the mentor use ' + st.label}><${Icon} name="sparkles" size=${13} /> Live AI · ${st.label}</span>`
+    : html`<span className="chip chip-plain" title="Add GEMINI_API_KEY on the server to enable live AI. All features still work."><${Icon} name="sparkles" size=${13} /> Offline AI</span>`;
+}
+
+function Header({ state, go, reset }) {
+  const inApp = !!state.profile;
+  return html`<header className="sticky-head">
+    <div className="gutter max-w-6xl mx-auto flex items-center justify-between gap-3 py-3">
+      <button onClick=${() => go(inApp ? 'workspace' : 'landing')} className="flex items-center gap-2 font-display text-xl font-bold text-ink" aria-label="Pivot home">
+        <span className="w-8 h-8 rounded-lg bg-accent text-accentInk inline-flex items-center justify-center"><${Icon} name="compass" size=${18} /></span>Pivot
+      </button>
+      <div className="flex items-center gap-2 flex-wrap justify-end">
+        <${AIBadge} />
+        ${inApp && html`<button className="btn btn-ghost !py-1.5 !px-3 text-sm" onClick=${reset}><${Icon} name="rotate" size=${15} /> Start over</button>`}
+      </div>
+    </div>
+  </header>`;
+}
+
+/* ------------------------------- Landing ------------------------------- */
+function Landing({ onStart, onDemo }) {
+  const ex = computeMatch(JOBS.teacher.s, CAREERS.instructional_designer.req);
+  return html`<main className="fade-in">
+    <section className="hero-grid border-b border-line">
+      <div className="gutter max-w-6xl mx-auto py-14 md:py-20 grid md:grid-cols-[1.15fr_1fr] gap-10 items-center">
+        <div className="min-w-0">
+          <span className="chip chip-accent mb-5"><${Icon} name="home" size=${14} /> For US adults 25–45 with a job, bills and no time to waste</span>
+          <h1 className="font-display text-4xl md:text-6xl font-extrabold leading-[1.03] text-ink">Start a new career without leaving home.</h1>
+          <p className="mt-5 text-lg text-muted max-w-xl">Pivot shows how your current job maps to an in-demand remote role, then gives you a 4-week sprint of free lessons and real portfolio tasks, reviewed by AI. Keep your paycheck while you find out if the new path fits.</p>
+          <p className="mt-4 text-ink font-semibold">At minimum: new skills and real experience. At maximum: a brand-new remote career.</p>
+          <div className="mt-7 flex flex-wrap gap-3">
+            <button className="btn btn-primary text-base !px-5 !py-3" onClick=${onStart}>Get Started <${Icon} name="arrowRight" /></button>
+            <button className="btn btn-ghost text-base !px-5 !py-3" onClick=${onDemo}><${Icon} name="play" size=${16} /> See a sample sprint</button>
+          </div>
+          <p className="mt-3 text-sm text-muted">No sign-up. Your progress stays in this browser.</p>
+        </div>
+        <div className="card p-5 md:p-6 shadow-sm min-w-0" aria-label="Example result">
+          <div className="flex items-center justify-between gap-2">
+            <span className="eyebrow">Example: Teacher → Instructional Designer</span>
+            <span className="chip chip-plain text-xs">Sample</span>
+          </div>
+          <div className="mt-4 flex items-end gap-4">
+            <div className="font-display text-6xl font-extrabold text-accent tnum leading-none">${ex.score}%</div>
+            <div className="text-muted text-sm pb-1">transferable<br/>skill match</div>
+          </div>
+          <div className="mt-5 grid gap-3">
+            <div><div className="eyebrow mb-2">Skills you already have</div>
+              <div className="flex flex-wrap gap-1.5">${ex.transferable.slice(0, 4).map(t => html`<span key=${t.k} className="chip chip-ok"><${Icon} name="check" size=${12} />${SKILLS[t.k]}</span>`)}</div></div>
+            <div><div className="eyebrow mb-2">Gaps to bridge</div>
+              <div className="flex flex-wrap gap-1.5">${(ex.gaps.length ? ex.gaps : ex.polish).slice(0, 3).map(t => html`<span key=${t.k} className="chip chip-warn">${SKILLS[t.k]}</span>`)}</div></div>
+            <div className="grid grid-cols-2 gap-3 pt-2 border-t border-line">
+              <div><div className="eyebrow">Entry remote pay</div><div className="font-display text-xl font-bold tnum">$55k–$70k</div></div>
+              <div><div className="eyebrow">Time to first job</div><div className="font-display text-xl font-bold">3–6 months</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section className="gutter max-w-6xl mx-auto py-14">
+      <h2 className="font-display text-3xl font-bold max-w-2xl">Built for people who can't quit to retrain</h2>
+      <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        ${[['book', '100% free resources', 'Every lesson links to free courses from Google, Khan Academy, freeCodeCamp, HubSpot and more. No tuition.'],
+          ['clock', 'Self-paced 4-week sprints', 'One skill area per week, sized for evenings and weekends around work and family.'],
+          ['folder', 'Real portfolio projects', 'Each week ends with a task that mirrors the real job and becomes a portfolio piece with resume bullets.'],
+          ['sparkles', 'AI mentor & task reviewer', 'Submit your work for instant, specific feedback. Ask the mentor when you get stuck at 10 pm.']]
+          .map(([ic, t, d]) => html`<div key=${t} className="card p-5">
+            <span className="w-10 h-10 rounded-lg bg-accentSoft text-accent inline-flex items-center justify-center"><${Icon} name=${ic} /></span>
+            <h3 className="font-display text-lg font-bold mt-4">${t}</h3><p className="text-muted mt-1.5 text-sm">${d}</p></div>`)}
+      </div>
+    </section>
+
+    <section className="border-y border-line bg-surface">
+      <div className="gutter max-w-6xl mx-auto py-14 grid md:grid-cols-4 gap-6">
+        <h2 className="font-display text-3xl font-bold md:col-span-4">How a pivot works</h2>
+        ${[['Tell us your job', 'Your current role, income and the remote career you are curious about.'],
+          ['See your match', 'Transferable skills, gaps and an honest pay comparison.'],
+          ['Learn the core 20%', 'Only the skills you need to get hired at entry level, in 4 modules.'],
+          ['Prove it in 4 weeks', 'Weekly tasks, AI reviews and a readiness verdict before you risk anything.']]
+          .map(([t, d], i) => html`<div key=${t} className="min-w-0"><div className="font-mono text-sm text-accent">Step ${i + 1}</div><h3 className="font-display text-lg font-bold mt-1">${t}</h3><p className="text-muted text-sm mt-1">${d}</p></div>`)}
+      </div>
+    </section>
+
+    <section className="gutter max-w-6xl mx-auto py-14">
+      <h2 className="font-display text-3xl font-bold">Plans</h2>
+      <div className="mt-6 grid md:grid-cols-2 gap-4 max-w-4xl">
+        <div className="card p-6"><div className="eyebrow">Free</div><div className="font-display text-4xl font-extrabold mt-1">$0</div>
+          <ul className="mt-4 grid gap-2 text-sm">${['Skill match for every remote career', 'Your 4-module minimum skillset', 'Week 1 lessons and task review', 'Remote job search links'].map(x => html`<li key=${x} className="flex gap-2"><${Icon} name="check" size=${16} className="text-ok mt-0.5 shrink-0" />${x}</li>`)}</ul></div>
+        <div className="card p-6 border-accent" style=${{ borderColor: 'var(--accent)' }}><div className="eyebrow text-accent">Sprint Pass</div><div className="font-display text-4xl font-extrabold mt-1">$49 <span className="text-base font-medium text-muted">per career sprint</span></div>
+          <ul className="mt-4 grid gap-2 text-sm">${['Weeks 2–4 tasks with unlimited AI reviews', '24/7 AI mentor that knows your plan', 'Portfolio page with ATS-ready resume bullets', 'Readiness verdict: skills, money, work fit, remote fit'].map(x => html`<li key=${x} className="flex gap-2"><${Icon} name="check" size=${16} className="text-ok mt-0.5 shrink-0" />${x}</li>`)}</ul>
+          <p className="text-xs text-muted mt-4">This prototype unlocks everything so you can try the full sprint.</p></div>
+      </div>
+    </section>
+    <${Footer} />
+  </main>`;
+}
+function Footer() {
+  return html`<footer className="border-t border-line"><div className="gutter max-w-6xl mx-auto py-8 text-xs text-muted grid gap-2">
+    <p>Skill profiles are modeled on O*NET skill categories (U.S. Department of Labor, CC BY 4.0). Salary ranges are planning estimates for this prototype; the production version imports BLS Occupational Employment and Wage Statistics.</p>
+    <p>Pivot gives learning guidance, not career, legal or financial advice. Pivot is not affiliated with the course providers it links to.</p>
+  </div></footer>`;
+}
+
+/* ------------------------------- Wizard ------------------------------- */
+function Modal({ children, onClose, label, wide }) {
+  useEffect(() => { const f = (e) => e.key === 'Escape' && onClose(); window.addEventListener('keydown', f); return () => window.removeEventListener('keydown', f); }, []);
+  return html`<div className="fixed inset-0 z-50 flex items-start md:items-center justify-center overflow-y-auto" role="dialog" aria-modal="true" aria-label=${label}
+      style=${{ background: 'rgba(8,10,20,.55)', padding: 'max(16px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left))' }}
+      onMouseDown=${(e) => e.target === e.currentTarget && onClose()}>
+    <div className=${`card w-full ${wide ? 'max-w-4xl' : 'max-w-2xl'} shadow-xl fade-in`}>${children}</div>
+  </div>`;
+}
+
+function Wizard({ onClose, onDone, init }) {
+  const [step, setStep] = useState(init?.step || 1);
+  const [job, setJob] = useState(init?.job || '');
+  const [income, setIncome] = useState(init?.income || '');
+  const [career, setCareer] = useState('');
+  const [q, setQ] = useState('');
+  const [learn, setLearn] = useState(null);
+  const [focus, setFocus] = useState(false);
+  const jobKey = matchJob(job);
+  const suggestions = useMemo(() => {
+    const t = job.toLowerCase().trim();
+    const all = Object.entries(JOBS).map(([k, j]) => ({ k, label: j.label }));
+    return t ? all.filter(x => x.label.toLowerCase().includes(t) || JOBS[x.k].aliases.some(a => a.includes(t) || t.includes(a))).slice(0, 6) : all.slice(0, 6);
+  }, [job]);
+  const careers = CAREER_ORDER.filter(k => { const c = CAREERS[k]; const t = q.toLowerCase(); return !t || c.title.toLowerCase().includes(t) || c.tagline.toLowerCase().includes(t); });
+  const canNext = step === 1 ? job.trim().length > 1 : step === 2 ? !!income : !!career;
+  const finish = () => onDone({ jobKey, jobLabel: jobKey && JOBS[jobKey].label.toLowerCase() === job.toLowerCase().trim() ? JOBS[jobKey].label : job.trim(), income, careerKey: career, seed: Math.floor(Math.random() * 1e9) });
+
+  return html`<${Modal} onClose=${onClose} label="Set up your pivot" wide=${step === 3}>
+    <div className="p-5 md:p-7">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">${[1, 2, 3].map(i => html`<span key=${i} className="h-1.5 rounded-full transition-all" style=${{ width: i === step ? 36 : 18, background: i <= step ? 'var(--accent)' : 'var(--line)' }}></span>`)}
+          <span className="text-sm text-muted ml-2">Step ${step} of 3</span></div>
+        <button className="btn btn-ghost !p-2" onClick=${onClose} aria-label="Close"><${Icon} name="x" /></button>
+      </div>
+
+      ${step === 1 && html`<div className="mt-6">
+        <h2 className="font-display text-2xl md:text-3xl font-bold">What do you do for work today?</h2>
+        <p className="text-muted mt-1">We use it to find which of your skills already transfer.</p>
+        <label htmlFor="job" className="block text-sm font-semibold mt-5 mb-1.5">Current occupation or job title</label>
+        <div className="relative">
+          <input id="job" className="input text-base" placeholder="e.g. Teacher, Retail Manager, Nurse" value=${job} autoComplete="off"
+            onChange=${e => setJob(e.target.value)} onFocus=${() => setFocus(true)} onBlur=${() => setTimeout(() => setFocus(false), 150)}
+            onKeyDown=${e => e.key === 'Enter' && canNext && setStep(2)} />
+          ${focus && suggestions.length > 0 && html`<div className="absolute z-10 left-0 right-0 mt-1 card shadow-lg overflow-hidden">
+            ${suggestions.map(s => html`<button key=${s.k} className="w-full text-left px-3 py-2 hover:bg-surface2 text-sm" onMouseDown=${() => setJob(s.label)}>${s.label}</button>`)}</div>`}
+        </div>
+        <div className="mt-3 flex flex-wrap gap-2">${['Teacher', 'Retail Manager', 'Customer Support Rep', 'Driver (Delivery / Rideshare)', 'Accountant / Bookkeeper', 'Nurse / Healthcare Worker'].map(x => html`<button key=${x} className="chip chip-plain hover:text-ink" onClick=${() => setJob(x)}>${x}</button>`)}</div>
+        ${job.trim().length > 1 && html`<p className=${'text-sm mt-3 ' + (jobKey ? 'text-ok' : 'text-muted')}>${jobKey ? html`<span className="inline-flex items-center gap-1"><${Icon} name="check" size=${14} /> Matched to our profile for <b>${JOBS[jobKey].label}</b></span>` : 'We will estimate your skills from your job title.'}</p>`}
+      </div>`}
+
+      ${step === 2 && html`<div className="mt-6">
+        <h2 className="font-display text-2xl md:text-3xl font-bold">What is your current annual income?</h2>
+        <p className="text-muted mt-1">Only used to compare against entry-level pay in your target role. It stays in this browser.</p>
+        <div className="mt-5 grid sm:grid-cols-2 gap-2" role="radiogroup" aria-label="Annual income">
+          ${INCOMES.map(i => html`<button key=${i.k} role="radio" aria-checked=${income === i.k} onClick=${() => setIncome(i.k)}
+            className=${`text-left px-4 py-3 rounded-xl border font-semibold tnum transition ${income === i.k ? 'border-accent bg-accentSoft text-accent' : 'border-line hover:bg-surface2'}`}>${i.label}</button>`)}
+        </div>
+      </div>`}
+
+      ${step === 3 && html`<div className="mt-6">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div><h2 className="font-display text-2xl md:text-3xl font-bold">Which remote career interests you?</h2>
+            <p className="text-muted mt-1">All of these roles are commonly done fully remote. Not sure? Open Learn More.</p></div>
+          <div className="relative w-full sm:w-64"><span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted"><${Icon} name="search" size=${16} /></span>
+            <input className="input !pl-9" placeholder="Search careers" value=${q} onChange=${e => setQ(e.target.value)} aria-label="Search careers" /></div>
+        </div>
+        <div className="mt-5 grid sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[52vh] overflow-y-auto pr-1">
+          ${careers.map(k => { const c = CAREERS[k]; const sel = career === k; const m = computeMatch(jobKey ? JOBS[jobKey].s : inferSkills(job), c.req);
+            return html`<div key=${k} className=${`rounded-xl border p-4 flex flex-col gap-2 transition ${sel ? 'border-accent bg-accentSoft' : 'border-line bg-surface'}`}>
+              <div className="flex items-start justify-between gap-2"><h3 className="font-display font-bold text-base leading-tight">${c.title}</h3><span className="chip chip-plain text-xs tnum shrink-0">${m.score}% match</span></div>
+              <p className="text-sm text-muted">${c.tagline}</p>
+              <div className="text-xs text-muted tnum">Entry ${fmtK(c.entry[0])}–${fmtK(c.entry[1])} · ${c.difficulty}</div>
+              <div className="flex gap-2 mt-auto pt-1">
+                <button className=${`btn !py-1.5 !px-3 text-sm ${sel ? 'btn-primary' : 'btn-ghost'}`} onClick=${() => setCareer(k)} aria-pressed=${sel}>${sel ? html`<${Icon} name="check" size=${15} /> Selected` : 'Choose'}</button>
+                <button className="btn !py-1.5 !px-3 text-sm text-accent" onClick=${() => setLearn(k)}>Learn More</button>
+              </div></div>`; })}
+        </div>
+      </div>`}
+
+      <div className="mt-7 flex items-center justify-between gap-3">
+        <button className="btn btn-ghost" onClick=${() => step === 1 ? onClose() : setStep(step - 1)}><${Icon} name="arrowLeft" size=${16} /> ${step === 1 ? 'Cancel' : 'Back'}</button>
+        <button className="btn btn-primary" disabled=${!canNext} onClick=${() => step < 3 ? setStep(step + 1) : finish()}>${step < 3 ? 'Continue' : 'See my match'} <${Icon} name="arrowRight" size=${16} /></button>
+      </div>
+    </div>
+    ${learn && html`<${CareerDrawer} k=${learn} onClose=${() => setLearn(null)} onChoose=${() => { setCareer(learn); setLearn(null); }} />`}
+  <//>`;
+}
+
+function CareerDrawer({ k, onClose, onChoose }) {
+  const c = CAREERS[k];
+  useEffect(() => { const f = (e) => e.key === 'Escape' && onClose(); window.addEventListener('keydown', f); return () => window.removeEventListener('keydown', f); }, []);
+  const diffChip = c.difficulty === 'Steep' ? 'chip-bad' : c.difficulty === 'Moderate' ? 'chip-warn' : 'chip-ok';
+  const maxPay = c.mid[1];
+  return html`<div className="fixed inset-0 z-[60]" role="dialog" aria-modal="true" aria-label=${c.title + ' details'}>
+    <div className="absolute inset-0" style=${{ background: 'rgba(8,10,20,.45)' }} onClick=${onClose}></div>
+    <aside className="absolute right-0 top-0 bottom-0 w-full max-w-md bg-surface border-l border-line overflow-y-auto drawer-enter"
+      style=${{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)', paddingRight: 'env(safe-area-inset-right)' }}>
+      <div className="p-6 grid gap-6">
+        <div className="flex items-start justify-between gap-3"><div><div className="eyebrow">Remote career</div><h2 className="font-display text-2xl font-bold mt-1">${c.title}</h2><p className="text-muted mt-1">${c.tagline}</p></div>
+          <button className="btn btn-ghost !p-2" onClick=${onClose} aria-label="Close"><${Icon} name="x" /></button></div>
+        <section><h3 className="font-semibold mb-2">A typical day</h3><ul className="grid gap-1.5 text-sm">${c.overview.map(o => html`<li key=${o} className="flex gap-2"><${Icon} name="check" size=${16} className="text-ok shrink-0 mt-0.5" />${o}</li>`)}</ul></section>
+        <section><h3 className="font-semibold mb-3">US job market</h3>
+          ${[['Entry level', c.entry], ['Mid level', c.mid]].map(([l, r]) => html`<div key=${l} className="mb-3"><div className="flex justify-between text-sm"><span>${l}</span><span className="tnum font-semibold">${fmtK(r[0])} – ${fmtK(r[1])}</span></div>
+            <div className="bar-track h-2 mt-1.5 relative"><div className="absolute h-full rounded-full" style=${{ left: (r[0] / maxPay * 100) + '%', width: ((r[1] - r[0]) / maxPay * 100) + '%', background: 'var(--accent)' }}></div></div></div>`)}
+          <div className="grid grid-cols-2 gap-3 mt-4 text-sm"><div className="card p-3"><div className="eyebrow">Remote demand</div><div className="font-semibold mt-0.5">${c.demand}</div></div><div className="card p-3"><div className="eyebrow">Growth outlook</div><div className="font-semibold mt-0.5">${c.growth}</div></div></div>
+          <p className="text-xs text-muted mt-2">Planning estimates for US remote roles.</p></section>
+        <section><h3 className="font-semibold mb-3">Career path</h3><ol className="grid gap-2">${c.path.map((p, i) => html`<li key=${p} className="flex items-center gap-3"><span className="w-7 h-7 rounded-full bg-accentSoft text-accent text-sm font-bold inline-flex items-center justify-center shrink-0">${i + 1}</span><span className="text-sm">${p}</span></li>`)}</ol></section>
+        <section className="grid grid-cols-2 gap-3"><div><div className="eyebrow mb-1">Learning curve</div><span className=${'chip ' + diffChip}>${c.difficulty}</span></div><div><div className="eyebrow mb-1">Time to first job</div><div className="font-semibold">${c.timeToJob}</div></div></section>
+        ${onChoose && html`<button className="btn btn-primary justify-center" onClick=${onChoose}>Choose ${c.title}</button>`}
+      </div>
+    </aside>
+  </div>`;
+}
+
+/* ------------------------------- Compatibility ------------------------------- */
+function Gauge({ value }) {
+  const r = 80, c = Math.PI * r, off = c * (1 - value / 100);
+  return html`<svg viewBox="0 0 200 116" className="w-full max-w-[260px]" role="img" aria-label=${value + ' percent transferable skill match'}>
+    <path d="M20 100 A80 80 0 0 1 180 100" fill="none" stroke="var(--surface2)" stroke-width="16" stroke-linecap="round" />
+    <path d="M20 100 A80 80 0 0 1 180 100" fill="none" stroke="var(--accent)" stroke-width="16" stroke-linecap="round" stroke-dasharray=${c} stroke-dashoffset=${off} style=${{ transition: 'stroke-dashoffset .8s ease' }} />
+    <text x="100" y="92" text-anchor="middle" fill="var(--ink)" style=${{ font: '800 40px var(--font-display)' }}>${value}%</text>
+    <text x="20" y="114" text-anchor="middle" fill="var(--muted)" style=${{ font: '500 10px var(--font-body)' }}>0</text>
+    <text x="180" y="114" text-anchor="middle" fill="var(--muted)" style=${{ font: '500 10px var(--font-body)' }}>100</text>
+  </svg>`;
+}
+
+function useInsight(profile, match) {
+  const [text, setText] = useState(null);
+  useEffect(() => {
+    let alive = true; const c = CAREERS[profile.careerKey];
+    const fallback = `Your work as ${/^[aeiou]/i.test(profile.jobLabel) ? 'an' : 'a'} ${profile.jobLabel.toLowerCase()} already covers ${match.score}% of what a ${c.title.toLowerCase()} needs, led by ${match.transferable.slice(0, 2).map(t => SKILLS[t.k].toLowerCase()).join(' and ') || 'your general work experience'}. ${match.gaps.length ? `The biggest gap is ${SKILLS[match.gaps[0].k].toLowerCase()}, which is exactly what the 4-week plan targets first.` : 'You have no major gaps, so the plan focuses on proof: portfolio pieces employers can see.'}`;
+    (async () => {
+      const prompt = `You are a practical US career coach. In 2-3 plain sentences (max 70 words, no lists, no hype), explain to a ${profile.jobLabel} why their experience transfers to a remote ${c.title} role and the one thing to focus on first. Facts computed by our system: transferable skill match ${match.score}%; strongest transferable skills: ${match.transferable.slice(0, 4).map(t => SKILLS[t.k]).join(', ') || 'none'}; biggest gaps: ${match.gaps.slice(0, 3).map(t => SKILLS[t.k]).join(', ') || 'none'}. Do not invent numbers.`;
+      const t = await aiText(prompt, { modelTier: 'quick', cache: true });
+      if (!alive) return;
+      if (t) setText(t.trim()); else { await wait(700); if (alive) setText(fallback); }
+    })();
+    return () => { alive = false; };
+  }, [profile.careerKey, profile.jobLabel]);
+  return text;
+}
+
+function Compatibility({ state, update, go, changeCareer }) {
+  const p = state.profile; const c = CAREERS[p.careerKey];
+  const m = computeMatch(profileSkills(p), c.req);
+  const insight = useInsight(p, m);
+  const income = INCOMES.find(i => i.k === p.income);
+  const max = Math.max(c.mid[1], income.mid) * 1.05;
+  const diff = c.entry[0] - income.mid;
+  return html`<main className="gutter max-w-6xl mx-auto py-8 md:py-10 fade-in">
+    <${Crumbs} step=${1} />
+    <h1 className="font-display text-3xl md:text-4xl font-bold mt-3">${p.jobLabel} → ${c.title}</h1>
+    <p className="text-muted mt-1">Your career compatibility analysis</p>
+    <div className="mt-6 grid lg:grid-cols-[320px_1fr] gap-5">
+      <div className="card p-6 flex flex-col items-center text-center">
+        <div className="eyebrow">Transferable skill match</div>
+        <${Gauge} value=${m.score} />
+        <p className="text-sm text-muted mt-1">${m.score >= 70 ? 'Strong starting point' : m.score >= 55 ? 'Solid foundation with clear gaps' : 'Bigger stretch: plan for extra practice'}</p>
+        <div className="mt-4 text-left w-full border-t border-line pt-4 min-h-[96px]">
+          <div className="eyebrow mb-1.5 flex items-center gap-1.5"><${Icon} name="sparkles" size=${13} /> Mentor's take</div>
+          ${insight ? html`<p className="text-sm fade-in">${insight}</p>` : html`<div className="flex gap-1.5 py-2"><span className="dot"></span><span className="dot"></span><span className="dot"></span></div>`}
+        </div>
+      </div>
+      <div className="grid gap-5 min-w-0">
+        <div className="card p-6">
+          <h2 className="font-display text-xl font-bold flex items-center gap-2"><${Icon} name="dollar" /> Salary comparison</h2>
+          <div className="mt-4 grid gap-4">
+            ${[['Your current income', income.mid, income.mid, 'var(--muted)', income.label], [`Entry-level remote ${c.title}`, c.entry[0], c.entry[1], 'var(--accent)', `${fmtK(c.entry[0])} – ${fmtK(c.entry[1])}`], [`Mid-level (2–4 years)`, c.mid[0], c.mid[1], 'var(--ok)', `${fmtK(c.mid[0])} – ${fmtK(c.mid[1])}`]].map(([l, lo, hi, col, lab]) => html`<div key=${l}>
+              <div className="flex justify-between gap-3 text-sm"><span>${l}</span><span className="font-semibold tnum">${lab}</span></div>
+              <div className="bar-track h-3 mt-1.5 relative"><div className="absolute h-full rounded-full" style=${{ left: 0, width: (hi / max * 100) + '%', background: col, opacity: lo === hi ? 0.7 : 0.25 }}></div>${lo !== hi && html`<div className="absolute h-full rounded-full" style=${{ left: 0, width: (lo / max * 100) + '%', background: col }}></div>`}</div></div>`)}
+          </div>
+          <p className=${`text-sm mt-4 font-medium ${diff >= 0 ? 'text-ok' : 'text-warn'}`}>${diff >= 0 ? `Entry pay starts about ${fmtK(diff)} above your current midpoint.` : `Entry pay may start about ${fmtK(-diff)} below your current midpoint. Mid-level pay closes the gap.`}</p>
+        </div>
+        <div className="grid md:grid-cols-2 gap-5">
+          <div className="card p-6"><h2 className="font-display text-lg font-bold flex items-center gap-2 text-ok"><${Icon} name="check" /> Skills you already have</h2>
+            <ul className="mt-3 grid gap-2">${m.transferable.length ? m.transferable.slice(0, 6).map(t => html`<li key=${t.k} className="flex items-center justify-between gap-3 text-sm"><span>${SKILLS[t.k]}</span><${Dots} c=${t.c} r=${t.r} /></li>`) : html`<li className="text-sm text-muted">Your general work experience still counts. The plan starts from the basics.</li>`}</ul></div>
+          <div className="card p-6"><h2 className="font-display text-lg font-bold flex items-center gap-2 text-warn"><${Icon} name="target" /> Skill gaps to bridge</h2>
+            <ul className="mt-3 grid gap-2">${[...m.gaps, ...m.polish].slice(0, 6).map(t => html`<li key=${t.k} className="flex items-center justify-between gap-3 text-sm"><span>${SKILLS[t.k]} ${t.r - t.c >= 2 ? html`<span className="chip chip-warn !py-0 !px-2 text-xs ml-1">learn</span>` : html`<span className="chip chip-plain !py-0 !px-2 text-xs ml-1">polish</span>`}</span><${Dots} c=${t.c} r=${t.r} /></li>`)}</ul></div>
+        </div>
+        <p className="text-xs text-muted flex items-center gap-1.5"><${Icon} name="info" size=${14} /> Dots show your level vs the level the role needs (out of 5).</p>
+      </div>
+    </div>
+    <div className="mt-7 flex flex-wrap gap-3 justify-between">
+      <button className="btn btn-ghost" onClick=${changeCareer}><${Icon} name="refresh" size=${16} /> Change Career</button>
+      <button className="btn btn-primary" onClick=${() => go('skillset')}>Continue to Roadmap <${Icon} name="arrowRight" size=${16} /></button>
+    </div>
+  </main>`;
+}
+function Dots({ c, r }) {
+  return html`<span className="inline-flex gap-1 shrink-0" aria-label=${`your level ${c} of 5, role needs ${r}`}>${[1, 2, 3, 4, 5].map(i => html`<span key=${i} className="w-2.5 h-2.5 rounded-full" style=${{ background: i <= Math.min(c, r) ? 'var(--ok)' : i <= r ? 'var(--warn)' : i <= c ? 'var(--ok)' : 'var(--surface2)', opacity: i > r && i <= c ? 0.45 : 1 }}></span>`)}</span>`;
+}
+function Crumbs({ step }) {
+  const items = ['Match', 'Minimum skillset', '4-week sprint'];
+  return html`<nav aria-label="Progress" className="flex flex-wrap items-center gap-2 text-sm">${items.map((t, i) => html`<span key=${t} className="inline-flex items-center gap-2"><span className=${i + 1 === step ? 'text-accent font-semibold' : i + 1 < step ? 'text-ink' : 'text-muted'}>${t}</span>${i < 2 && html`<${Icon} name="arrowRight" size=${14} className="text-muted" />`}</span>`)}</nav>`;
+}
+
+/* ------------------------------- Skillset ------------------------------- */
+function Skillset({ state, go, update }) {
+  const c = CAREERS[state.profile.careerKey];
+  return html`<main className="gutter max-w-6xl mx-auto py-8 md:py-10 fade-in">
+    <${Crumbs} step=${2} />
+    <h1 className="font-display text-3xl md:text-4xl font-bold mt-3">Your minimum viable skillset</h1>
+    <p className="text-muted mt-2 max-w-2xl">You do not need to master everything to get hired as an entry-level ${c.title}. These four areas are the core 20% that does 80% of the job. One per week.</p>
+    <div className="mt-7 grid md:grid-cols-2 gap-4">
+      ${c.modules.map((mod, i) => html`<div key=${mod.name} className="card p-6 flex flex-col gap-3">
+        <div className="flex items-center justify-between"><span className="font-mono text-sm text-accent">Week ${i + 1}</span><span className="chip chip-plain text-xs"><${Icon} name="clock" size=${12} /> ~${Math.round((mod.primary.mins + 135) / 60)}–${Math.round((mod.primary.mins + 135) / 60) + 3} hrs</span></div>
+        <h2 className="font-display text-xl font-bold">${mod.name}</h2>
+        <ul className="grid gap-1.5 text-sm">${mod.core.map(x => html`<li key=${x} className="flex gap-2"><${Icon} name="check" size=${16} className="text-ok mt-0.5 shrink-0" />${x}</li>`)}</ul>
+        <div className="mt-auto pt-3 border-t border-line text-sm"><span className="text-muted">Portfolio task:</span> <span className="font-medium">${mod.task.title}</span></div>
+      </div>`)}
+    </div>
+    <div className="mt-7 flex flex-wrap gap-3 justify-between">
+      <button className="btn btn-ghost" onClick=${() => go('compat')}><${Icon} name="arrowLeft" size=${16} /> Back to match</button>
+      <button className="btn btn-primary" onClick=${() => update({ view: 'workspace', startedAt: state.startedAt || Date.now(), activeWeek: 1, tab: 'plan' })}>Start my 4-week sprint <${Icon} name="arrowRight" size=${16} /></button>
+    </div>
+  </main>`;
+}
+
+/* ------------------------------- Workspace ------------------------------- */
+function Workspace({ state, update, openLearn }) {
+  const p = state.profile; const c = CAREERS[p.careerKey];
+  const passed = [1, 2, 3, 4].filter(w => state.submissions[w]?.passed).length;
+  const streak = streakOf(state.activeDays || []);
+  const tabs = [['plan', 'Plan', 'layers'], ['portfolio', 'My Portfolio', 'folder'], ['jobs', 'Remote Jobs', 'briefcase'], ['readiness', 'Readiness', 'shield']];
+  const milestone = passed === 4 ? 'Sprint complete. You have a full portfolio.' : passed >= 2 ? 'Halfway there. Your readiness verdict is unlocked.' : passed === 1 ? 'First portfolio piece done. Keep the streak going.' : 'Finish week 1 to earn your first portfolio piece.';
+  return html`<main className="gutter max-w-6xl mx-auto py-6 md:py-8 fade-in">
+    <${Crumbs} step=${3} />
+    <div className="mt-3 flex flex-wrap items-end justify-between gap-4">
+      <div className="min-w-0"><h1 className="font-display text-3xl md:text-4xl font-bold">${p.name ? p.name + '’s' : 'Your'} sprint to ${c.title}</h1>
+        <p className="text-muted mt-1">From ${p.jobLabel} · <button className="text-accent font-medium" onClick=${() => openLearn(p.careerKey)}>About this career</button>${p.demo ? ' · Sample profile' : ''}</p></div>
+      <div className="flex items-center gap-2 flex-wrap">
+        <span className="chip chip-warn tnum"><${Icon} name="flame" size=${14} /> ${streak}-day streak</span>
+        <span className="chip chip-accent tnum"><${Icon} name="trophy" size=${14} /> ${passed}/4 portfolio pieces</span>
+      </div>
+    </div>
+    <div className="card p-4 mt-5">
+      <div className="flex justify-between text-sm"><span className="font-semibold">Sprint progress</span><span className="tnum text-muted">${passed * 25}%</span></div>
+      <div className="bar-track h-2.5 mt-2"><div className="bar-fill" style=${{ width: passed * 25 + '%' }}></div></div>
+      <div className="mt-3 grid grid-cols-4 gap-2">${[1, 2, 3, 4].map(w => { const s = state.submissions[w]; return html`<button key=${w} onClick=${() => update({ tab: 'plan', activeWeek: w })} className="flex items-center gap-1.5 text-xs sm:text-sm text-left min-w-0">
+        <span className=${`w-5 h-5 rounded-md inline-flex items-center justify-center shrink-0 ${s?.passed ? 'bg-ok text-surface' : 'border border-line'}`}>${s?.passed && html`<${Icon} name="check" size=${13} strokeWidth=${3} />`}</span><span className="truncate">Week ${w}</span></button>`; })}</div>
+      <p className="text-sm text-muted mt-3">${milestone}</p>
+    </div>
+    <div className="mt-5 flex gap-1 border-b border-line overflow-x-auto" role="tablist">
+      ${tabs.map(([k, l, ic]) => html`<button key=${k} role="tab" aria-selected=${state.tab === k} onClick=${() => update({ tab: k })}
+        className=${`flex items-center gap-2 px-3 sm:px-4 py-2.5 text-sm font-semibold border-b-2 -mb-px whitespace-nowrap ${state.tab === k ? 'border-accent text-accent' : 'border-transparent text-muted hover:text-ink'}`}><${Icon} name=${ic} size=${16} />${l}</button>`)}
+    </div>
+    <div className="mt-5">
+      ${state.tab === 'plan' && html`<${Plan} state=${state} update=${update} />`}
+      ${state.tab === 'portfolio' && html`<${Portfolio} state=${state} update=${update} />`}
+      ${state.tab === 'jobs' && html`<${Jobs} state=${state} />`}
+      ${state.tab === 'readiness' && html`<${Readiness} state=${state} update=${update} />`}
+    </div>
+  </main>`;
+}
+
+function Plan({ state, update }) {
+  const c = CAREERS[state.profile.careerKey]; const w = state.activeWeek; const mod = c.modules[w - 1];
+  return html`<div>
+    <div className="flex gap-2 flex-wrap" role="tablist" aria-label="Weeks">${[1, 2, 3, 4].map(i => html`<button key=${i} role="tab" aria-selected=${w === i} onClick=${() => update({ activeWeek: i })}
+      className=${`px-4 py-2 rounded-lg text-sm font-semibold border transition ${w === i ? 'bg-accent text-accentInk border-transparent' : 'border-line hover:bg-surface2'}`}>Week ${i}${state.submissions[i]?.passed ? ' ✓' : ''}</button>`)}</div>
+    <div className="mt-5 grid lg:grid-cols-[1fr_340px] gap-5">
+      <div className="grid gap-5 min-w-0">
+        <div><div className="font-mono text-sm text-accent">Week ${w} of 4</div><h2 className="font-display text-2xl md:text-3xl font-bold mt-1">${mod.name}</h2></div>
+        <${TaskCard} key=${state.profile.careerKey + w} state=${state} update=${update} w=${w} mod=${mod} career=${c} />
+      </div>
+      <aside className="grid gap-4 content-start">
+        <div className="card p-5"><h3 className="font-semibold flex items-center gap-2"><${Icon} name="book" size=${17} /> Free resources</h3>
+          <ul className="mt-3 grid gap-3">${[mod.primary, yt(mod.name), cs(mod.name)].map(r => html`<li key=${r.url}><a href=${r.url} target="_blank" rel="noopener" className="group block rounded-lg p-3 border border-line hover:border-accent transition">
+            <div className="flex items-start justify-between gap-2"><span className="font-medium text-sm group-hover:text-accent">${r.title}</span><${Icon} name="external" size=${14} className="text-muted shrink-0 mt-0.5" /></div>
+            <div className="text-xs text-muted mt-1">${r.provider} · ~${r.mins} min</div></a></li>`)}</ul></div>
+        <div className="card p-5"><h3 className="font-semibold">This week's focus</h3><ul className="mt-2 grid gap-1.5 text-sm">${mod.core.map(x => html`<li key=${x} className="flex gap-2"><span className="w-1.5 h-1.5 rounded-full bg-accent mt-2 shrink-0"></span>${x}</li>`)}</ul></div>
+      </aside>
+    </div>
+  </div>`;
+}
+
+function TaskCard({ state, update, w, mod, career }) {
+  const task = mod.task; const sub = state.submissions[w];
+  const [text, setText] = useState(sub?.text || '');
+  const [link, setLink] = useState(sub?.link || '');
+  const [ans, setAns] = useState(sub?.answers || { q1Store: '', q1Pct: '', q2Month: '', q3Product: '' });
+  const [busy, setBusy] = useState(false);
+  const [showCsv, setShowCsv] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [checkin, setCheckin] = useState(state.checkins[w] || null);
+  const ctlRef = useRef(null);
+  const data = useMemo(() => task.kind === 'dataset' ? makeCoffeeData(state.profile.seed || 7) : null, [task.kind, state.profile.seed]);
+  const words = text.trim().split(/\s+/).filter(Boolean).length;
+
+  const copyCsv = async () => { try { await navigator.clipboard.writeText(data.csv); setCopied(true); setTimeout(() => setCopied(false), 1800); } catch (e) { setShowCsv(true); } };
+
+  const submit = async () => {
+    setBusy(true);
+    const autoChecks = data ? [...gradeDataset(data, ans), ...rubricCheck(task, text, link)] : rubricCheck(task, text, link);
+    const auto = scoreOf(autoChecks);
+    const ctl = new AbortController(); ctlRef.current = ctl;
+    const answerBlock = data ? `\nDataset answers given: fastest-growing store=${ans.q1Store}, growth=${ans.q1Pct}%, lowest month=${ans.q2Month}, top product=${ans.q3Product}. Our automatic check marked these: ${gradeDataset(data, ans).map(c => c.label + ' ' + (c.met ? 'correct' : 'incorrect')).join('; ')}. Do not reveal the correct values.` : '';
+    const prompt = `You review entry-level portfolio work for career changers moving into a remote ${career.title} role in the US. Be encouraging and specific, like a senior colleague. Grade strictly against the criteria.\n\nTASK: ${task.title}\nSCENARIO: ${task.scenario}\nDELIVERABLES: ${task.deliverables.join('; ')}\nCRITERIA: ${task.criteria.map(c => c[0]).join('; ')}${answerBlock}\n\nSUBMISSION LINK: ${link || '(none)'}\nSUBMISSION TEXT:\n"""${text.slice(0, 6000)}"""\n\nReply with only JSON: {"score": integer 0-100, "summary": "one sentence verdict", "strengths": ["2 short items"], "improvements": ["2-3 short, actionable items"], "bullets": ["2 ATS-friendly resume bullets describing this project, past tense, no invented metrics beyond what the submission states"]}`;
+    let ai = await aiJSON(prompt, { signal: ctl.signal });
+    if (ai && typeof ai.score !== 'number') ai = null;
+    if (!ai) await wait(1100);
+    const final = ai ? Math.round(auto * 0.5 + clamp(ai.score, 0, 100) * 0.5) : auto;
+    const missing = autoChecks.filter(c => !c.met);
+    const fallbackReview = {
+      summary: final >= PASS ? 'Solid work that meets the core expectations for an entry-level portfolio piece.' : 'A good start, but a few required elements are missing before this is portfolio-ready.',
+      strengths: autoChecks.filter(c => c.met).slice(0, 2).map(c => c.label),
+      improvements: missing.length ? missing.slice(0, 3).map(c => 'Add: ' + c.label.toLowerCase()) : ['Add one concrete number or example to make the result memorable', 'Tighten the opening so a hiring manager gets the point in 10 seconds']
+    };
+    const review = ai ? { summary: ai.summary, strengths: (ai.strengths || []).slice(0, 3), improvements: (ai.improvements || []).slice(0, 3) } : fallbackReview;
+    const bullets = ai && Array.isArray(ai.bullets) && ai.bullets.length ? ai.bullets.slice(0, 3) : task.bullets;
+    const passed = final >= PASS;
+    const today = todayStr();
+    update(s => ({ submissions: Object.assign({}, s.submissions, { [w]: { text, link, answers: data ? ans : undefined, checks: autoChecks, auto, score: final, review, passed: passed || !!s.submissions[w]?.passed, lastPassed: passed, bullets, ai: !!ai, at: Date.now() } }), activeDays: Array.from(new Set([...(s.activeDays || []), today])) }));
+    setBusy(false);
+  };
+  const stop = () => { ctlRef.current?.abort(); };
+  const saveCheckin = (v) => { setCheckin(v); update(s => ({ checkins: Object.assign({}, s.checkins, { [w]: v }) })); };
+
+  return html`<div className="grid gap-5">
+    <div className="card p-6">
+      <div className="flex items-center gap-2 flex-wrap"><span className="eyebrow">Portfolio task</span>${sub?.passed && html`<span className="chip chip-ok text-xs"><${Icon} name="shield" size=${13} /> Portfolio Ready</span>`}</div>
+      <h3 className="font-display text-xl font-bold mt-1">${task.title}</h3>
+      <p className="mt-2">${task.scenario}</p>
+      <div className="mt-4 grid sm:grid-cols-2 gap-4">
+        <div><div className="text-sm font-semibold mb-1.5">Deliverables</div><ul className="grid gap-1 text-sm">${task.deliverables.map(d => html`<li key=${d} className="flex gap-2"><span className="text-accent">→</span>${d}</li>`)}</ul></div>
+        <div><div className="text-sm font-semibold mb-1.5">Acceptance criteria</div><ul className="grid gap-1 text-sm">${(data ? ['All four answers correct', ...task.criteria.map(c => c[0])] : task.criteria.map(c => c[0])).map(d => html`<li key=${d} className="flex gap-2"><${Icon} name="check" size=${15} className="text-muted mt-0.5 shrink-0" />${d}</li>`)}</ul></div>
+      </div>
+    </div>
+
+    ${data && html`<div className="card p-6 min-w-0">
+      <div className="flex flex-wrap items-center justify-between gap-3"><h4 className="font-semibold flex items-center gap-2"><${Icon} name="database" size=${17} /> bean_and_co_sales.csv <span className="text-muted font-normal text-sm tnum">· ${data.rows.length} rows</span></h4>
+        <div className="flex gap-2"><button className="btn btn-ghost !py-1.5 !px-3 text-sm" onClick=${copyCsv}><${Icon} name="copy" size=${15} /> ${copied ? 'Copied' : 'Copy CSV'}</button><button className="btn btn-ghost !py-1.5 !px-3 text-sm" onClick=${() => setShowCsv(!showCsv)}>${showCsv ? 'Hide' : 'Show'} raw</button></div></div>
+      <p className="text-sm text-muted mt-1">Paste into Google Sheets (File → Import → Paste) and use a pivot table or SUMIFS.</p>
+      <div className="scroll-x mt-3"><table className="data tnum"><thead><tr><th>month</th><th>store</th><th>product</th><th>revenue</th></tr></thead>
+        <tbody>${data.rows.slice(0, 8).map((r, i) => html`<tr key=${i}><td>${r.month}</td><td>${r.store}</td><td>${r.product}</td><td>${fmt$(r.revenue)}</td></tr>`)}<tr><td colSpan="4" className="text-muted">… ${data.rows.length - 8} more rows</td></tr></tbody></table></div>
+      ${showCsv && html`<textarea className="input font-mono text-xs mt-3" readOnly value=${data.csv} aria-label="Raw CSV" style=${{ minHeight: 160 }}></textarea>`}
+    </div>`}
+
+    <div className="card p-6">
+      <h4 className="font-semibold">Your submission</h4>
+      ${data && html`<div className="grid sm:grid-cols-2 gap-3 mt-3">
+        <div><label htmlFor=${'q1s' + w} className="text-sm font-medium">1. Fastest-growing store</label><select id=${'q1s' + w} className="input mt-1" value=${ans.q1Store} onChange=${e => setAns(Object.assign({}, ans, { q1Store: e.target.value }))}><option value="">Choose a store</option>${['Downtown', 'Airport', 'Campus', 'Riverside', 'Harbor'].map(s => html`<option key=${s}>${s}</option>`)}</select></div>
+        <div><label htmlFor=${'q1p' + w} className="text-sm font-medium">Its growth, Dec vs Jan (%)</label><input id=${'q1p' + w} className="input mt-1 tnum" inputMode="decimal" placeholder="e.g. 41.2" value=${ans.q1Pct} onChange=${e => setAns(Object.assign({}, ans, { q1Pct: e.target.value }))} /></div>
+        <div><label htmlFor=${'q2' + w} className="text-sm font-medium">2. Lowest revenue month</label><select id=${'q2' + w} className="input mt-1" value=${ans.q2Month} onChange=${e => setAns(Object.assign({}, ans, { q2Month: e.target.value }))}><option value="">Choose a month</option>${MONTHS.map(m => html`<option key=${m}>${m}</option>`)}</select></div>
+        <div><label htmlFor=${'q3' + w} className="text-sm font-medium">3. Top product by revenue</label><select id=${'q3' + w} className="input mt-1" value=${ans.q3Product} onChange=${e => setAns(Object.assign({}, ans, { q3Product: e.target.value }))}><option value="">Choose a product</option>${['Latte', 'Cold Brew', 'Pastries'].map(s => html`<option key=${s}>${s}</option>`)}</select></div>
+      </div>`}
+      <label htmlFor=${'link' + w} className="block text-sm font-medium mt-4">Link (optional): Google Doc, Figma, GitHub, Notion</label>
+      <input id=${'link' + w} className="input mt-1" placeholder="https://" value=${link} onChange=${e => setLink(e.target.value)} />
+      <label htmlFor=${'text' + w} className="block text-sm font-medium mt-4">${data ? 'Your recommendation to the director' : 'Write or paste your work'}</label>
+      <textarea id=${'text' + w} className="input mt-1" placeholder=${data ? 'Based on the data, I recommend…' : 'Paste your answer here. Aim for clear, specific work you would show an employer.'} value=${text} onChange=${e => setText(e.target.value)}></textarea>
+      <div className="flex flex-wrap items-center justify-between gap-3 mt-3">
+        <span className=${`text-sm tnum ${words >= task.minWords ? 'text-ok' : 'text-muted'}`}>${words} / ${task.minWords}+ words</span>
+        <div className="flex gap-2">${busy && html`<button className="btn btn-ghost" onClick=${stop}>Stop</button>`}
+          <button className="btn btn-primary" disabled=${busy || (!text.trim() && !link.trim())} onClick=${submit}>${busy ? html`<${Icon} name="loader" size=${16} className="spin" /> Reviewing…` : html`<${Icon} name="sparkles" size=${16} /> Submit for AI Review`}</button></div>
+      </div>
+    </div>
+
+    ${sub && sub.review && html`<${ReviewCard} sub=${sub} />`}
+    ${sub && html`<${CheckIn} value=${checkin} onSave=${saveCheckin} />`}
+  </div>`;
+}
+
+function ReviewCard({ sub }) {
+  const ok = sub.lastPassed ?? sub.passed;
+  return html`<div className="card p-6 fade-in" style=${{ borderColor: ok ? 'var(--ok)' : 'var(--warn)' }}>
+    <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex items-center gap-3"><div className=${`font-display text-4xl font-extrabold tnum ${ok ? 'text-ok' : 'text-warn'}`}>${sub.score}</div>
+        <div><div className="font-semibold">${ok ? 'Portfolio Ready' : 'Revise and resubmit'}</div><div className="text-xs text-muted">${sub.ai ? 'Automatic checks + AI reviewer' : 'Automatic checks + offline reviewer'} · pass mark ${PASS}</div></div></div>
+      ${ok && html`<span className="chip chip-ok"><${Icon} name="folder" size=${14} /> Added to My Portfolio</span>`}
+    </div>
+    <p className="mt-4">${sub.review.summary}</p>
+    <div className="mt-4 grid md:grid-cols-2 gap-4">
+      <div><div className="text-sm font-semibold text-ok mb-1.5">What works</div><ul className="grid gap-1 text-sm">${sub.review.strengths.map(x => html`<li key=${x} className="flex gap-2"><${Icon} name="check" size=${15} className="text-ok mt-0.5 shrink-0" />${x}</li>`)}</ul></div>
+      <div><div className="text-sm font-semibold text-warn mb-1.5">Improve next</div><ul className="grid gap-1 text-sm">${sub.review.improvements.map(x => html`<li key=${x} className="flex gap-2"><span className="text-warn">→</span>${x}</li>`)}</ul></div>
+    </div>
+    <details className="mt-4"><summary className="text-sm font-semibold cursor-pointer">Automatic checks (${sub.checks.filter(c => c.met).length}/${sub.checks.length} passed)</summary>
+      <ul className="mt-2 grid gap-1 text-sm">${sub.checks.map(c => html`<li key=${c.label} className="flex items-start gap-2"><span className=${c.met ? 'text-ok' : 'text-bad'}><${Icon} name=${c.met ? 'check' : 'x'} size=${15} /></span><span>${c.label}${c.note ? html` <span className="text-muted">· ${c.note}</span>` : ''}</span></li>`)}</ul></details>
+  </div>`;
+}
+
+function CheckIn({ value, onSave }) {
+  const [v, setV] = useState(value || { energy: 0, remote: 0 });
+  const row = (key, label, low, high) => html`<div><div className="text-sm font-medium">${label}</div>
+    <div className="flex gap-1.5 mt-2" role="radiogroup" aria-label=${label}>${[1, 2, 3, 4, 5].map(i => html`<button key=${i} role="radio" aria-checked=${v[key] === i} onClick=${() => { const nv = Object.assign({}, v, { [key]: i }); setV(nv); if (nv.energy && nv.remote) onSave(nv); }}
+      className=${`w-10 h-10 rounded-lg border font-semibold tnum ${v[key] === i ? 'bg-accent text-accentInk border-transparent' : 'border-line hover:bg-surface2'}`}>${i}</button>`)}</div>
+    <div className="flex justify-between text-xs text-muted mt-1 w-[226px] max-w-full"><span>${low}</span><span>${high}</span></div></div>`;
+  return html`<div className="card p-6">
+    <h4 className="font-semibold flex items-center gap-2"><${Icon} name="heart" size=${17} /> Quick check-in</h4>
+    <p className="text-sm text-muted mt-1">Feeds your readiness verdict. Be honest; "not for me" is a useful answer too.</p>
+    <div className="mt-4 grid sm:grid-cols-2 gap-5">${row('energy', 'How did doing this work feel?', 'Drained', 'Energized')}${row('remote', 'How was working on it alone, from home?', 'Lonely / hard', 'Loved it')}</div>
+    ${value && html`<p className="text-sm text-ok mt-3 flex items-center gap-1.5"><${Icon} name="check" size=${15} /> Saved</p>`}
+  </div>`;
+}
+
+function Portfolio({ state, update }) {
+  const c = CAREERS[state.profile.careerKey];
+  const items = [1, 2, 3, 4].map(w => ({ w, sub: state.submissions[w], mod: c.modules[w - 1] })).filter(x => x.sub?.passed);
+  const allBullets = items.flatMap(x => x.sub.bullets || x.mod.task.bullets);
+  const [copied, setCopied] = useState(false);
+  const copyAll = async () => { try { await navigator.clipboard.writeText(allBullets.map(b => '• ' + b).join('\n')); setCopied(true); setTimeout(() => setCopied(false), 1800); } catch (e) { } };
+  if (!items.length) return html`<div className="card p-8 text-center"><span className="w-12 h-12 rounded-xl bg-accentSoft text-accent inline-flex items-center justify-center"><${Icon} name="folder" size=${22} /></span>
+    <h2 className="font-display text-xl font-bold mt-3">Your portfolio fills up as you pass tasks</h2><p className="text-muted mt-1 max-w-md mx-auto">Each passed weekly task lands here with 2–3 resume bullets you can paste into your resume and LinkedIn.</p>
+    <button className="btn btn-primary mt-5" onClick=${() => update({ tab: 'plan' })}>Go to this week's task</button></div>`;
+  return html`<div className="grid gap-4">
+    <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="font-display text-2xl font-bold">My Portfolio</h2>
+      <button className="btn btn-ghost !py-1.5 text-sm" onClick=${copyAll}><${Icon} name="copy" size=${15} /> ${copied ? 'Copied' : 'Copy all resume bullets'}</button></div>
+    ${items.map(({ w, sub, mod }) => html`<article key=${w} className="card p-6">
+      <div className="flex flex-wrap items-center justify-between gap-2"><span className="font-mono text-sm text-accent">Week ${w} · ${mod.name}</span><span className="chip chip-ok text-xs tnum">Score ${sub.score}</span></div>
+      <h3 className="font-display text-xl font-bold mt-1">${mod.task.title}</h3>
+      ${sub.link && html`<a href=${sub.link} target="_blank" rel="noopener" className="text-sm text-accent inline-flex items-center gap-1 mt-1 break-all">${sub.link} <${Icon} name="external" size=${13} /></a>`}
+      <div className="mt-4"><div className="eyebrow mb-2">Resume bullets (ATS-friendly)</div><ul className="grid gap-2">${(sub.bullets || mod.task.bullets).map(b => html`<li key=${b} className="text-sm flex gap-2"><span className="text-accent">•</span>${b}</li>`)}</ul></div>
+    </article>`)}
+  </div>`;
+}
+
+function Jobs({ state }) {
+  const c = CAREERS[state.profile.careerKey]; const kw = c.title.replace(/\s*\/.*$/, '');
+  const q = encodeURIComponent('entry level ' + kw);
+  const boards = [
+    ['LinkedIn', 'Remote + entry level filters applied', `https://www.linkedin.com/jobs/search/?keywords=${encodeURIComponent(kw)}&f_WT=2&f_E=1%2C2`],
+    ['Indeed', 'Remote, entry-level search', `https://www.indeed.com/jobs?q=${q}&l=Remote`],
+    ['We Work Remotely', 'Remote-only job board', `https://weworkremotely.com/remote-jobs/search?term=${encodeURIComponent(kw)}`],
+    ['Remote.co', 'Curated remote roles', 'https://remote.co/remote-jobs/'],
+    ['FlexJobs', 'Vetted remote and flexible jobs (paid)', `https://www.flexjobs.com/search?search=${encodeURIComponent(kw)}`],
+    ['Wellfound', 'Startups that hire career changers', `https://wellfound.com/role/r/${encodeURIComponent(kw.toLowerCase().replace(/[^a-z]+/g, '-'))}`]
+  ];
+  const titles = { data_analyst: ['Junior Data Analyst', 'Reporting Analyst', 'Operations Analyst', 'Data Entry → Analyst apprenticeships'], instructional_designer: ['Instructional Design Associate', 'eLearning Developer', 'Training Coordinator', 'Curriculum Writer (contract)'], customer_success: ['Customer Success Associate', 'Onboarding Specialist', 'Customer Support Specialist (SaaS)', 'Implementation Coordinator'], ux_designer: ['Junior Product Designer', 'UX Design Intern / Apprentice', 'UI Designer (contract)', 'UX Researcher Assistant'], digital_marketer: ['Marketing Coordinator', 'Email Marketing Specialist', 'Social Media Coordinator', 'Content Marketing Assistant'], frontend_dev: ['Junior Frontend Developer', 'Web Developer (Entry Level)', 'WordPress Developer', 'Developer Apprenticeship'], technical_writer: ['Associate Technical Writer', 'Documentation Specialist', 'Knowledge Base Writer', 'Content Writer (Tech)'], virtual_assistant: ['Virtual Assistant', 'Remote Executive Assistant', 'Administrative Coordinator', 'Operations Assistant'], automation_specialist: ['Automation Specialist', 'Operations Specialist', 'No-Code Developer (contract)', 'RevOps Coordinator'], qa_tester: ['QA Tester', 'Manual QA Analyst', 'Software Test Associate', 'Beta / UAT Tester'], seo_specialist: ['SEO Coordinator', 'SEO Content Writer', 'Digital Marketing Assistant', 'Local SEO Specialist'] }[state.profile.careerKey] || [];
+  return html`<div className="grid gap-5">
+    <div><h2 className="font-display text-2xl font-bold">Entry-level remote jobs</h2><p className="text-muted mt-1">Pre-filtered searches for roles that accept career changers. Listings open on each job board.</p></div>
+    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">${boards.map(([n, d, u]) => html`<a key=${n} href=${u} target="_blank" rel="noopener" className="card p-5 hover:border-accent transition group">
+      <div className="flex items-center justify-between gap-2"><span className="font-display font-bold text-lg group-hover:text-accent">${n}</span><${Icon} name="external" size=${16} className="text-muted" /></div><p className="text-sm text-muted mt-1">${d}</p><p className="text-xs mt-3 font-mono text-accent truncate">"${kw}" · remote</p></a>`)}</div>
+    <div className="card p-6"><h3 className="font-semibold">Job titles that welcome career changers</h3><p className="text-sm text-muted mt-1">Search these too. They often skip the degree requirement when you show a portfolio.</p>
+      <div className="flex flex-wrap gap-2 mt-3">${titles.map(t => html`<a key=${t} className="chip chip-accent hover:underline" target="_blank" rel="noopener" href=${`https://www.linkedin.com/jobs/search/?keywords=${encodeURIComponent(t.replace(/\s*\(.*\)/, ''))}&f_WT=2`}>${t}</a>`)}</div></div>
+    <div className="card p-6"><h3 className="font-semibold">Before you apply</h3><ul className="mt-2 grid gap-1.5 text-sm">${['Lead your resume with your Pivot portfolio projects, then your current job', 'Paste your resume bullets from My Portfolio', 'Mention transferable skills from your match in the first line of your cover letter', 'Avoid listings that ask you to pay for training or equipment'].map(x => html`<li key=${x} className="flex gap-2"><${Icon} name="check" size=${16} className="text-ok mt-0.5 shrink-0" />${x}</li>`)}</ul></div>
+  </div>`;
+}
+
+function Readiness({ state, update }) {
+  const r = readiness(state); const c = CAREERS[state.profile.careerKey];
+  const V = { ready: ['Ready to start applying', 'chip-ok', `Your skills, money picture, energy and remote comfort all point the same way. Keep building portfolio pieces while you apply for entry-level ${c.title} roles.`],
+    close: ['Getting close', 'chip-warn', 'One pillar is holding you back. Look at the lowest score below and spend next week there before applying.'],
+    not_yet: ['Not yet, and that is useful to know', 'chip-bad', `At least one pillar is weak. You learned this without quitting your job. Try another remote career or rework the weakest area.`] };
+  return html`<div className="grid gap-5">
+    <div><h2 className="font-display text-2xl font-bold">Readiness verdict</h2><p className="text-muted mt-1">Four pillars decide whether this pivot is right for you. The verdict unlocks after 2 passed tasks and check-ins.</p></div>
+    <div className="card p-6">
+      ${r.verdict ? html`<div><span className=${'chip ' + V[r.verdict][1]}><${Icon} name="shield" size=${14} /> Verdict</span><h3 className="font-display text-3xl font-bold mt-2">${V[r.verdict][0]}</h3><p className="mt-2 max-w-2xl">${V[r.verdict][2]}</p></div>`
+        : html`<div className="flex items-start gap-3"><span className="w-10 h-10 rounded-lg bg-surface2 text-muted inline-flex items-center justify-center shrink-0"><${Icon} name="lock" /></span><div><h3 className="font-display text-xl font-bold">Verdict locked</h3><p className="text-sm text-muted mt-1">${r.passed}/2 tasks passed${Object.keys(state.checkins).length ? '' : ', no check-ins yet'}. Finish week ${Math.min(4, r.passed + 1)} and rate how it felt.</p></div></div>`}
+    </div>
+    <div className="grid sm:grid-cols-2 gap-4">${r.pillars.map(p => html`<div key=${p.key} className="card p-5">
+      <div className="flex items-center justify-between"><span className="font-semibold flex items-center gap-2"><${Icon} name=${p.icon} size=${17} /> ${p.label}</span><span className=${`font-display text-2xl font-bold tnum ${p.value == null ? 'text-muted' : p.value >= 70 ? 'text-ok' : p.value >= 50 ? 'text-warn' : 'text-bad'}`}>${p.value == null ? '—' : p.value}</span></div>
+      <div className="bar-track h-2 mt-3"><div className="h-full rounded-full transition-all" style=${{ width: (p.value || 0) + '%', background: p.value == null ? 'transparent' : p.value >= 70 ? 'var(--ok)' : p.value >= 50 ? 'var(--warn)' : 'var(--bad)' }}></div></div>
+      <p className="text-sm text-muted mt-2">${p.note}</p></div>`)}</div>
+    <div className="flex flex-wrap gap-3"><button className="btn btn-ghost" onClick=${() => update({ tab: 'plan' })}><${Icon} name="layers" size=${16} /> Back to plan</button></div>
+  </div>`;
+}
+
+/* ------------------------------- Mentor ------------------------------- */
+function mentorFallback(msg, state) {
+  const c = CAREERS[state.profile.careerKey]; const w = state.activeWeek; const mod = c.modules[w - 1]; const t = msg.toLowerCase();
+  if (/(stuck|task|how do i|start|help)/.test(t)) return `For "${mod.task.title}", start small: list the ${mod.task.deliverables.length} deliverables as headings, then fill each with one concrete example. The reviewer looks for: ${mod.task.criteria.map(x => x[0].toLowerCase()).join(', ')}. Draft it fast, submit, then use the feedback to revise.`;
+  if (/(salary|pay|money|earn)/.test(t)) return `Entry-level remote ${c.title} roles typically start around ${fmtK(c.entry[0])}–${fmtK(c.entry[1])}, rising to ${fmtK(c.mid[0])}–${fmtK(c.mid[1])} with 2–4 years of experience. Keep your current job until you have 2–3 portfolio pieces and interviews lined up.`;
+  if (/(time|busy|kids|schedule|tired)/.test(t)) return `With a job and family, aim for 4 short sessions a week: two 45-minute weeknight sessions for the free lessons, one weekend hour for the task, and 15 minutes to submit and read feedback. Consistency beats marathons.`;
+  if (/(job|apply|resume|interview)/.test(t)) return `Apply once you have 2 portfolio pieces. Lead your resume with them, paste the bullets from My Portfolio, and search the titles in the Remote Jobs tab. In interviews, connect one story from your current job to each skill the role needs.`;
+  return `This week is about ${mod.name.toLowerCase()}. Focus on: ${mod.core.join('; ')}. Ask me about the task, your schedule, pay, or how to apply, and I'll get specific.`;
+}
+
+function Mentor({ state, update }) {
+  const [open, setOpen] = useState(false);
+  const [input, setInput] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [live, setLive] = useState('');
+  const endRef = useRef(null); const ctlRef = useRef(null);
+  const chat = state.chat || [];
+  useEffect(() => { endRef.current?.scrollIntoView({ block: 'end' }); }, [chat.length, live, open]);
+  if (!state.profile || state.view !== 'workspace') return null;
+  const c = CAREERS[state.profile.careerKey]; const mod = c.modules[state.activeWeek - 1];
+  const send = async (text) => {
+    const msg = (text || input).trim(); if (!msg || busy) return;
+    setInput(''); setBusy(true); setLive('');
+    const turns = [...chat, { role: 'user', content: msg }].slice(-12);
+    update(s => ({ chat: [...(s.chat || []), { role: 'user', content: msg }].slice(-30) }));
+    const rules = `You are Pivot's AI career and study mentor for US adults (25-45) switching to remote work while keeping their job. Be warm, concrete and brief (under 120 words unless asked for more). Use plain American English. Never promise jobs or salaries. Context: current job: ${state.profile.jobLabel}; target: remote ${c.title}; week ${state.activeWeek} of 4, module "${mod.name}" (${mod.core.join(', ')}); this week's task: "${mod.task.title}" — ${mod.task.scenario}. Typical entry pay: ${fmtK(c.entry[0])}-${fmtK(c.entry[1])}. Help them learn; do not write the whole task for them.`;
+    const ctl = new AbortController(); ctlRef.current = ctl;
+    let answer = await aiText([{ role: 'user', content: rules }, ...turns], { modelTier: 'quick', cache: false, signal: ctl.signal, onText: ({ text }) => setLive(text) });
+    if (answer == null) { await wait(900); answer = mentorFallback(msg, state); }
+    setLive('');
+    update(s => ({ chat: [...(s.chat || []), { role: 'assistant', content: answer || '(stopped)' }].slice(-30) }));
+    setBusy(false);
+  };
+  return html`<div>
+    ${open && html`<section className="mentor-panel card shadow-2xl flex flex-col fade-in" aria-label="AI mentor">
+      <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-line"><div><div className="font-semibold flex items-center gap-2"><${Icon} name="sparkles" size=${16} /> AI Mentor</div><div className="text-xs text-muted">Knows your plan: week ${state.activeWeek}, ${c.title}</div></div>
+        <button className="btn btn-ghost !p-1.5" onClick=${() => setOpen(false)} aria-label="Close mentor"><${Icon} name="x" size=${16} /></button></div>
+      <div className="flex-1 overflow-y-auto px-4 py-3 grid gap-3 content-start text-sm" style=${{ minHeight: 220 }}>
+        ${chat.length === 0 && html`<div className="text-muted">Ask anything about this week, your task, your schedule or how to apply.
+          <div className="flex flex-wrap gap-1.5 mt-3">${['I\'m stuck on this week\'s task', 'How do I fit this around my job?', 'When should I start applying?'].map(s => html`<button key=${s} className="chip chip-accent text-left" onClick=${() => send(s)}>${s}</button>`)}</div></div>`}
+        ${chat.map((m, i) => html`<div key=${i} className=${m.role === 'user' ? 'justify-self-end max-w-[85%] bg-accent text-accentInk rounded-2xl rounded-br-md px-3 py-2' : 'max-w-[92%] bg-surface2 rounded-2xl rounded-bl-md px-3 py-2 whitespace-pre-wrap'}>${m.content}</div>`)}
+        ${busy && html`<div className="max-w-[92%] bg-surface2 rounded-2xl rounded-bl-md px-3 py-2 whitespace-pre-wrap">${live || html`<span className="inline-flex gap-1.5"><span className="dot"></span><span className="dot"></span><span className="dot"></span></span>`}</div>`}
+        <div ref=${endRef}></div>
+      </div>
+      <form className="flex gap-2 p-3 border-t border-line" onSubmit=${e => { e.preventDefault(); send(); }}>
+        <label htmlFor="mentor-input" className="sr-only">Message</label>
+        <input id="mentor-input" className="input" placeholder="Ask your mentor…" value=${input} onChange=${e => setInput(e.target.value)} />
+        ${busy ? html`<button type="button" className="btn btn-ghost !px-3" onClick=${() => ctlRef.current?.abort()}>Stop</button>` : html`<button className="btn btn-primary !px-3" aria-label="Send" disabled=${!input.trim()}><${Icon} name="send" size=${16} /></button>`}
+      </form>
+    </section>`}
+    <button className="mentor-fab btn btn-primary shadow-xl !rounded-full !px-4 !py-3" onClick=${() => setOpen(!open)} aria-expanded=${open}><${Icon} name=${open ? 'x' : 'message'} size=${18} /> ${open ? 'Close' : 'Ask mentor'}</button>
+  </div>`;
+}
+
+/* ------------------------------- App ------------------------------- */
+function App() {
+  const [state, setState] = useState(loadState);
+  const [wizard, setWizard] = useState(false);
+  const [learn, setLearn] = useState(null);
+  useEffect(() => { saveState(state); }, [state]);
+  useEffect(() => { window.scrollTo(0, 0); }, [state.view]);
+  const update = (patch, clearProfile) => setState(s => {
+    const p = typeof patch === 'function' ? patch(s) : patch;
+    return Object.assign({}, s, p, clearProfile ? { profile: null, submissions: {}, checkins: {}, chat: [], startedAt: null } : {});
+  });
+  const go = (view) => update({ view });
+  const reset = () => { setState(EMPTY); };
+  const onDone = (profile) => { setWizard(false); setState(Object.assign({}, EMPTY, { profile, view: 'compat', activeDays: [todayStr()] })); };
+  let view = state.view;
+  if (!state.profile && view !== 'landing') view = 'landing';
+  return html`<div>
+    <${Header} state=${state} go=${go} reset=${reset} />
+    ${view === 'landing' && html`<${Landing} onStart=${() => setWizard(true)} onDemo=${() => setState(demoState())} />`}
+    ${view === 'compat' && html`<${Compatibility} state=${state} update=${update} go=${go} changeCareer=${() => setWizard({ step: 3, job: state.profile.jobLabel, income: state.profile.income })} />`}
+    ${view === 'skillset' && html`<${Skillset} state=${state} update=${update} go=${go} />`}
+    ${view === 'workspace' && html`<${Workspace} state=${state} update=${update} openLearn=${setLearn} />`}
+    ${view !== 'landing' && html`<${Footer} />`}
+    ${wizard && html`<${Wizard} init=${typeof wizard === 'object' ? wizard : null} onClose=${() => setWizard(false)} onDone=${onDone} />`}
+    ${learn && html`<${CareerDrawer} k=${learn} onClose=${() => setLearn(null)} />`}
+    <${Mentor} state=${state} update=${update} />
+  </div>`;
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(html`<${App} />`);
+})();
+</script>

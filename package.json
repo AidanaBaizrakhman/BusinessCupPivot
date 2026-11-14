@@ -1,0 +1,13 @@
+{
+  "name": "pivot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Remote career pivot prototype with a Gemini-powered AI reviewer and mentor",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
