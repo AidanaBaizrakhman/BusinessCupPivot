@@ -4,7 +4,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap">
 <style>
-
+/* Layout concept: a calm workbench. Landing reads like a product page; the app is a left-to-right journey
+   (profile -> match -> skillset -> 4-week workspace) with one strong indigo accent and emerald for "done". */
 :root {
   --bg: #F4F5F9;
   --surface: #FFFFFF;
@@ -110,7 +111,15 @@ tailwind.config = {
 <div id="root"></div>
 
 <script>
-
+/* =====================================================================
+   Pivot — remote career pivot workspace
+   Architecture:
+     DATA      skill taxonomy, current jobs, remote careers, 4-week curricula
+     ENGINE    deterministic scoring (skill match, salary, readiness, dataset grading)
+     AI        adapter: live Claude via window.claude.use("sample"), with an offline
+               fallback so every feature works without an API key
+     UI        React (htm templates), Tailwind utility classes, Lucide icon paths
+   ===================================================================== */
 (function () {
 const { useState, useEffect, useRef, useMemo } = React;
 const html = htm.bind(React.createElement);
@@ -201,6 +210,9 @@ const INCOMES = [
   { k: '100+', label: '$100k+', mid: 115000 }
 ];
 
+/* ------------------------------ DATA: CAREERS ------------------------------
+   Salary ranges are planning estimates for this prototype (production: BLS OEWS import).
+   Resources link to free providers or search pages so links stay valid. */
 const yt = (q) => ({ title: 'Beginner walkthroughs: ' + q, provider: 'YouTube', url: 'https://www.youtube.com/results?search_query=' + encodeURIComponent(q + ' for beginners'), mins: 45 });
 const cs = (q) => ({ title: q + ' (free to audit)', provider: 'Coursera', url: 'https://www.coursera.org/search?query=' + encodeURIComponent(q), mins: 90 });
 const fcc = (q) => ({ title: 'Tutorials: ' + q, provider: 'freeCodeCamp', url: 'https://www.freecodecamp.org/news/search/?query=' + encodeURIComponent(q), mins: 40 });
@@ -687,7 +699,12 @@ function readiness(state) {
   return { pillars, verdict, passed };
 }
 
-/* ------------------------------- AI ADAPTER ------------------------------- */
+/* ------------------------------- AI ADAPTER -------------------------------
+   Provider order:
+     1. "gemini"  — your server route POST /api/ai (server.js locally, api/ai.js on Vercel).
+                    The Gemini API key lives on the server, never in the browser.
+     2. "claude"  — when the page runs inside Claude as an Artifact (window.claude "sample").
+     3. "offline" — deterministic templates, so every feature still works with no AI at all. */
 const AI_ENDPOINT = '/api/ai';
 let providerPromise = null; let aiDisabled = false; const aiListeners = new Set();
 function getProvider() {
@@ -760,7 +777,7 @@ function useAIStatus() {
 
 /* ------------------------------- STATE ------------------------------- */
 const KEY = 'pivot.v1';
-const EMPTY = { view: 'landing', profile: null, submissions: {}, checkins: {}, activeDays: [], activeWeek: 1, tab: 'plan', chat: [], startedAt: null };
+const EMPTY = { view: 'landing', profile: null, submissions: {}, checkins: {}, activeDays: [], activeWeek: 1, tab: 'plan', chat: [], startedAt: null, paid: null };
 function loadState() { try { const s = localStorage.getItem(KEY); return s ? Object.assign({}, EMPTY, JSON.parse(s)) : EMPTY; } catch (e) { return EMPTY; } }
 function saveState(s) { try { localStorage.setItem(KEY, JSON.stringify(s)); } catch (e) { } }
 function streakOf(days) {
@@ -878,7 +895,7 @@ function Landing({ onStart, onDemo }) {
           <ul className="mt-4 grid gap-2 text-sm">${['Skill match for every remote career', 'Your 4-module minimum skillset', 'Week 1 lessons and task review', 'Remote job search links'].map(x => html`<li key=${x} className="flex gap-2"><${Icon} name="check" size=${16} className="text-ok mt-0.5 shrink-0" />${x}</li>`)}</ul></div>
         <div className="card p-6 border-accent" style=${{ borderColor: 'var(--accent)' }}><div className="eyebrow text-accent">Sprint Pass</div><div className="font-display text-4xl font-extrabold mt-1">$49 <span className="text-base font-medium text-muted">per career sprint</span></div>
           <ul className="mt-4 grid gap-2 text-sm">${['Weeks 2–4 tasks with unlimited AI reviews', '24/7 AI mentor that knows your plan', 'Portfolio page with ATS-ready resume bullets', 'Readiness verdict: skills, money, work fit, remote fit'].map(x => html`<li key=${x} className="flex gap-2"><${Icon} name="check" size=${16} className="text-ok mt-0.5 shrink-0" />${x}</li>`)}</ul>
-          <p className="text-xs text-muted mt-4">This prototype unlocks everything so you can try the full sprint.</p></div>
+          <p className="text-xs text-muted mt-4">Checkout runs in test mode: use the test card shown at checkout. No real charge.</p></div>
       </div>
     </section>
     <${Footer} />
@@ -1125,6 +1142,7 @@ function Workspace({ state, update, openLearn }) {
       <div className="flex items-center gap-2 flex-wrap">
         <span className="chip chip-warn tnum"><${Icon} name="flame" size=${14} /> ${streak}-day streak</span>
         <span className="chip chip-accent tnum"><${Icon} name="trophy" size=${14} /> ${passed}/4 portfolio pieces</span>
+        ${state.paid ? html`<span className="chip chip-ok"><${Icon} name="shield" size=${14} /> Sprint Pass active</span>` : ''}
       </div>
     </div>
     <div className="card p-4 mt-5">
@@ -1147,15 +1165,77 @@ function Workspace({ state, update, openLearn }) {
   </main>`;
 }
 
+/* ------------------------------- Paywall (test-mode checkout) -------------------------------
+   Weeks 2-4 require the Sprint Pass. Checkout runs in TEST MODE: only the published test card is
+   accepted, nothing is charged, and no card data leaves the browser. Production: swap for Stripe Checkout. */
+const PRICE = 49;
+const TEST_CARD = '4242 4242 4242 4242';
+function luhnOk(num) {
+  const d = num.replace(/\D/g, ''); if (d.length < 13) return false;
+  let sum = 0; for (let i = 0; i < d.length; i++) { let n = +d[d.length - 1 - i]; if (i % 2) { n *= 2; if (n > 9) n -= 9; } sum += n; }
+  return sum % 10 === 0;
+}
+function Paywall({ state, update, career }) {
+  const [open, setOpen] = useState(false);
+  const [card, setCard] = useState('');
+  const [exp, setExp] = useState('');
+  const [cvc, setCvc] = useState('');
+  const [err, setErr] = useState('');
+  const [busy, setBusy] = useState(false);
+  const fill = () => { setCard(TEST_CARD); setExp('12/34'); setCvc('123'); setErr(''); };
+  const fmtCard = (v) => v.replace(/\D/g, '').slice(0, 16).replace(/(\d{4})(?=\d)/g, '$1 ');
+  const pay = async (e) => {
+    e.preventDefault();
+    const digits = card.replace(/\D/g, '');
+    if (!luhnOk(digits)) return setErr('That card number is not valid.');
+    if (digits !== TEST_CARD.replace(/\D/g, '')) return setErr('Test mode: use the test card 4242 4242 4242 4242.');
+    if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(exp)) return setErr('Enter the expiry as MM/YY.');
+    if (!/^\d{3,4}$/.test(cvc)) return setErr('Enter a 3-digit CVC.');
+    setErr(''); setBusy(true);
+    await wait(1200);
+    update({ paid: { plan: 'sprint', price: PRICE, career: state.profile.careerKey, at: Date.now(), test: true } });
+    setBusy(false);
+  };
+  const perks = ['Weeks 2–4: lessons, tasks and unlimited AI reviews', 'AI mentor that knows your plan', 'Portfolio page with ATS-ready resume bullets', 'Readiness verdict across 4 pillars'];
+  return html`<div className="card p-6 md:p-8 fade-in" style=${{ borderColor: 'var(--accent)' }}>
+    <div className="flex flex-wrap items-start justify-between gap-4">
+      <div className="min-w-0"><span className="chip chip-accent"><${Icon} name="lock" size=${14} /> Sprint Pass</span>
+        <h3 className="font-display text-2xl md:text-3xl font-bold mt-3">Unlock weeks 2–4 of your ${career.title} sprint</h3>
+        <p className="text-muted mt-1">Week 1 is free. Finish the sprint to get your portfolio and your readiness verdict.</p></div>
+      <div className="text-right"><div className="font-display text-5xl font-extrabold tnum">$${PRICE}</div><div className="text-sm text-muted">one-time, per career sprint</div></div>
+    </div>
+    <ul className="mt-5 grid sm:grid-cols-2 gap-2 text-sm">${perks.map(p => html`<li key=${p} className="flex gap-2"><${Icon} name="check" size=${16} className="text-ok mt-0.5 shrink-0" />${p}</li>`)}</ul>
+    ${!open ? html`<div className="mt-6 flex flex-wrap items-center gap-3">
+        <button className="btn btn-primary text-base !px-5 !py-3" onClick=${() => { setOpen(true); }}>Get the Sprint Pass · $${PRICE} <${Icon} name="arrowRight" size=${16} /></button>
+        <span className="text-sm text-muted">Less than one session with a career coach.</span></div>`
+    : html`<form className="mt-6 grid gap-3 max-w-md" onSubmit=${pay} noValidate>
+        <div className="rounded-xl p-3 text-sm" style=${{ background: 'var(--warn-soft)', color: 'var(--warn)' }}>
+          <b>Test mode, no real charge.</b> Use card <span className="font-mono">4242 4242 4242 4242</span>, any future date, any CVC.
+          <button type="button" className="underline font-semibold ml-1" onClick=${fill}>Fill test card</button></div>
+        <label htmlFor="pw-card" className="text-sm font-medium">Card number</label>
+        <input id="pw-card" className="input font-mono tnum" inputMode="numeric" autoComplete="off" placeholder="4242 4242 4242 4242" value=${card} onChange=${e => setCard(fmtCard(e.target.value))} />
+        <div className="grid grid-cols-2 gap-3">
+          <div><label htmlFor="pw-exp" className="text-sm font-medium">Expiry</label><input id="pw-exp" className="input mt-1 font-mono tnum" autoComplete="off" placeholder="MM/YY" value=${exp} onChange=${e => setExp(e.target.value.replace(/[^\d/]/g, '').slice(0, 5))} /></div>
+          <div><label htmlFor="pw-cvc" className="text-sm font-medium">CVC</label><input id="pw-cvc" className="input mt-1 font-mono tnum" inputMode="numeric" autoComplete="off" placeholder="123" value=${cvc} onChange=${e => setCvc(e.target.value.replace(/\D/g, '').slice(0, 4))} /></div>
+        </div>
+        ${err && html`<p className="text-sm text-bad" role="alert">${err}</p>`}
+        <button className="btn btn-primary justify-center !py-3" disabled=${busy}>${busy ? html`<${Icon} name="loader" size=${16} className="spin" /> Processing…` : `Pay $${PRICE} (test)`}</button>
+        <p className="text-xs text-muted">Card details stay in your browser and are never sent anywhere.</p>
+      </form>`}
+  </div>`;
+}
+
 function Plan({ state, update }) {
   const c = CAREERS[state.profile.careerKey]; const w = state.activeWeek; const mod = c.modules[w - 1];
   return html`<div>
     <div className="flex gap-2 flex-wrap" role="tablist" aria-label="Weeks">${[1, 2, 3, 4].map(i => html`<button key=${i} role="tab" aria-selected=${w === i} onClick=${() => update({ activeWeek: i })}
-      className=${`px-4 py-2 rounded-lg text-sm font-semibold border transition ${w === i ? 'bg-accent text-accentInk border-transparent' : 'border-line hover:bg-surface2'}`}>Week ${i}${state.submissions[i]?.passed ? ' ✓' : ''}</button>`)}</div>
+      className=${`px-4 py-2 rounded-lg text-sm font-semibold border transition ${w === i ? 'bg-accent text-accentInk border-transparent' : 'border-line hover:bg-surface2'}`}><span className="inline-flex items-center gap-1.5">Week ${i}${state.submissions[i]?.passed ? ' ✓' : ''}${i > 1 && !state.paid ? html`<${Icon} name="lock" size=${13} />` : ''}</span></button>`)}</div>
     <div className="mt-5 grid lg:grid-cols-[1fr_340px] gap-5">
       <div className="grid gap-5 min-w-0">
         <div><div className="font-mono text-sm text-accent">Week ${w} of 4</div><h2 className="font-display text-2xl md:text-3xl font-bold mt-1">${mod.name}</h2></div>
-        <${TaskCard} key=${state.profile.careerKey + w} state=${state} update=${update} w=${w} mod=${mod} career=${c} />
+        ${w > 1 && !state.paid
+          ? html`<${Paywall} state=${state} update=${update} career=${c} />`
+          : html`<${TaskCard} key=${state.profile.careerKey + w} state=${state} update=${update} w=${w} mod=${mod} career=${c} />`}
       </div>
       <aside className="grid gap-4 content-start">
         <div className="card p-5"><h3 className="font-semibold flex items-center gap-2"><${Icon} name="book" size=${17} /> Free resources</h3>
