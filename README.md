@@ -72,3 +72,53 @@ Final task score = 50% automatic checks + 50% AI score. Pass mark: 70.
 - `/api/ai` is public: it is limited to 30 requests/minute per IP and 20k characters per request.
 - Salary ranges and skill profiles are prototype estimates. Production version: import O*NET
   (skills, CC BY 4.0) and BLS OEWS (wages).
+
+## Appendix (details behind the pitch deck)
+
+The deck is limited to 10 slides, so the full numbers live here.
+
+### A. Problem and user
+| Figure | Value | Source |
+|---|---|---|
+| US workers who want to change careers this year | 43% | FlexJobs survey of 4,000+ workers, reported by Entrepreneur, Mar 2026 |
+| Monthly quits rate, total nonfarm | 2.1% (Sept 2026) | BLS JOLTS news release, Nov 3, 2026 |
+| Employed Americans aged 25–44 | 73.3M (36.3M aged 25–34 + 37.0M aged 35–44) | BLS CPS Table 3, 2025 annual averages |
+
+Example user: Jessica, 34, elementary teacher, two kids, mortgage, wants a remote job.
+Similar segments: retail and restaurant managers, support reps, admin assistants, healthcare workers, drivers.
+
+### B. Market
+| Layer | Value | How |
+|---|---|---|
+| TAM | 31.5M | 73.3M employed aged 25–44 × 43% who want a career change |
+| SAM | ~3M | 10% of TAM who want to learn online and work remotely (assumption) |
+| SOM, year 1 | 3,000 payers | ≈ $190k revenue at $64 LTV; at 2% conversion needs ~150k free users (assumption) |
+| $100M a year | ≈ 1.06M payers × $94 | $64 sprint LTV + $30 assumed course-referral fee; 3.4% of TAM |
+
+### C. Unit economics
+| Metric | Value | Basis |
+|---|---|---|
+| Price | $49 per career sprint | Week 1 free |
+| Free → paid conversion | 2% | RevenueCat State of Subscription Apps 2026: median download-to-paid 2.0% (D35, all apps) |
+| Finish all 4 weeks | 45% | Assumption to test |
+| Buy a second sprint | 30% | Assumption to test |
+| LTV | $64 | 1.3 sprints × $49 |
+| CAC, organic content | ~$8 | Assumption (TikTok, YouTube, r/teachers, r/careerguidance) |
+| CAC, referrals / shareable match card | ~$5 | Assumption |
+| CAC, paid social | ~$30 | $1.20 CPC ÷ 4% conversion (assumption) |
+| Blended CAC target | ≤ $25 | LTV / CAC ≈ 2.5×; with $30 referral fee ≈ 3.7× |
+| Year 1 | ≈ $75k spend for ≈ $190k revenue | 3,000 payers × $25 CAC / × $64 LTV |
+
+### D. Risks and how we handle them
+| Risk | Mitigation |
+|---|---|
+| AI grades wrongly | Half of every score comes from deterministic code checks; dataset answers are graded exactly |
+| Verdict read as a guarantee | Shown as guidance, not a promise of a job; disclaimer in the footer |
+| Skill and pay data are estimates | Next step: import O*NET (CC BY 4.0) and BLS OEWS |
+| Free courses exist | We sell checked practice and a decision, not content |
+
+### E. Sources
+- BLS, Employed persons by age, 2025: https://www.bls.gov/cps/cpsaat03.htm
+- BLS JOLTS, September 2026: https://www.bls.gov/news.release/archives/jolts_11032026.htm
+- FlexJobs via Entrepreneur, Mar 2026: https://www.entrepreneur.com/business-news/43-of-workers-want-career-changes-but-most-wont-leave-jobs/503145
+- RevenueCat, State of Subscription Apps 2026: https://www.revenuecat.com/state-of-subscription-apps-2026/
